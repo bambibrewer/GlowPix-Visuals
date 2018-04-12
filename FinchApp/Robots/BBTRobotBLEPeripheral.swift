@@ -20,8 +20,6 @@ enum BBTRobotType {
 			return FlutterPeripheral.deviceUUID
 		case .Finch:
 			return FinchPeripheral.deviceUUID
-		default:
-			return CBUUID()
 		}
 	}
 	

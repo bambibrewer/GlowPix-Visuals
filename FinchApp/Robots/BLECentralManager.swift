@@ -222,8 +222,6 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
 			robotInit = FlutterPeripheral.init
 		case .Finch:
 			robotInit = FinchPeripheral.init
-		default:
-			robotInit = HummingbirdPeripheral.init
 		}
 		
 		self.currentlyConnecting = robotInit(peripheral, {rbt in

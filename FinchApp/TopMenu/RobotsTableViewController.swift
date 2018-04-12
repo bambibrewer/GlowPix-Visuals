@@ -17,7 +17,7 @@ class RobotsTableViewController: UITableViewController {
     
     var foundRobots: [(robot:CBPeripheral,ss:NSNumber)] = []
     
-    var header = "Select Robot"
+    var header = "Choose your Finch"
     var delegate: RobotTableViewControllerDelegate?
 
     override func viewDidLoad() {

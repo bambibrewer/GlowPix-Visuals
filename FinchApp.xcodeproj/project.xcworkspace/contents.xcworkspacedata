@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:FinchApp.xcodeproj">
+      location = "group:Raleway-Regular.ttf">
+   </FileRef>
+   <FileRef
+      location = "self:">
    </FileRef>
 </Workspace>

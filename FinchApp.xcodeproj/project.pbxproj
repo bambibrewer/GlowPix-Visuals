@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		311E21B8207E588900D24B59 /* HSBColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21B7207E588900D24B59 /* HSBColorPicker.swift */; };
+		311E21BF207E7BA800D24B59 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */; };
+		315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315C307D207A6EB100597549 /* LevelTableViewController.swift */; };
 		31934E0C2063F0B200B999DD /* BBTRobotBLEPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0A2063F0B200B999DD /* BBTRobotBLEPeripheral.swift */; };
 		31934E0D2063F0B200B999DD /* HummingbirdPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0B2063F0B200B999DD /* HummingbirdPeripheral.swift */; };
 		31934E0F2063F1B600B999DD /* BBTRobotState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0E2063F1B600B999DD /* BBTRobotState.swift */; };
@@ -49,6 +52,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		311E21B7207E588900D24B59 /* HSBColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HSBColorPicker.swift; sourceTree = "<group>"; };
+		311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
+		315C307D207A6EB100597549 /* LevelTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelTableViewController.swift; sourceTree = "<group>"; };
 		31934E0A2063F0B200B999DD /* BBTRobotBLEPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBTRobotBLEPeripheral.swift; sourceTree = "<group>"; };
 		31934E0B2063F0B200B999DD /* HummingbirdPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HummingbirdPeripheral.swift; sourceTree = "<group>"; };
 		31934E0E2063F1B600B999DD /* BBTRobotState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBTRobotState.swift; sourceTree = "<group>"; };
@@ -104,6 +110,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		311E21B9207E735100D24B59 /* Blocks */ = {
+			isa = PBXGroup;
+			children = (
+				31A353FC20615E97003928E9 /* Block.swift */,
+				311E21B7207E588900D24B59 /* HSBColorPicker.swift */,
+				311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */,
+			);
+			path = Blocks;
+			sourceTree = "<group>";
+		};
 		31934E092063F09F00B999DD /* Robots */ = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +142,7 @@
 			children = (
 				31CC1A802061807E00548D12 /* RobotsTableViewController.swift */,
 				31A353F82061509D003928E9 /* TopMenuViewController.swift */,
+				315C307D207A6EB100597549 /* LevelTableViewController.swift */,
 				31A353F92061509D003928E9 /* TopMenuViewController.xib */,
 			);
 			path = TopMenu;
@@ -156,9 +173,9 @@
 			children = (
 				31934E1E2069264000B999DD /* TopMenu */,
 				31934E092063F09F00B999DD /* Robots */,
+				311E21B9207E735100D24B59 /* Blocks */,
 				31A353C520614DED003928E9 /* AppDelegate.swift */,
 				31A353C720614DED003928E9 /* ViewController.swift */,
-				31A353FC20615E97003928E9 /* Block.swift */,
 				31A353C920614DED003928E9 /* Main.storyboard */,
 				31A353CF20614DED003928E9 /* Assets.xcassets */,
 				31A353D120614DED003928E9 /* LaunchScreen.storyboard */,
@@ -323,6 +340,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				31934E1B2063F3E000B999DD /* FlutterUtilities.swift in Sources */,
+				311E21B8207E588900D24B59 /* HSBColorPicker.swift in Sources */,
+				311E21BF207E7BA800D24B59 /* ColorPickerViewController.swift in Sources */,
 				31934E0D2063F0B200B999DD /* HummingbirdPeripheral.swift in Sources */,
 				31A353C820614DED003928E9 /* ViewController.swift in Sources */,
 				31A353FA2061509D003928E9 /* TopMenuViewController.swift in Sources */,
@@ -330,6 +349,7 @@
 				31934E172063F32400B999DD /* FinchPeripheral.swift in Sources */,
 				31934E0C2063F0B200B999DD /* BBTRobotBLEPeripheral.swift in Sources */,
 				31934E192063F32C00B999DD /* FlutterPeripheral.swift in Sources */,
+				315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */,
 				31CC1A812061807E00548D12 /* RobotsTableViewController.swift in Sources */,
 				31934E132063F2E300B999DD /* BLECentralManager.swift in Sources */,
 				31934E0F2063F1B600B999DD /* BBTRobotState.swift in Sources */,
