@@ -68,7 +68,10 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     
     //A dictionary to keep track of the ghost images that show up
     //as a block gets close enough to snap onto another
-    var tempImageViews: [Int: UIImageView] = [:]
+    var ghostImageViews: [Int: UIImageView] = [:]
+    //A dictionary to keep track of temporary blocks created
+    //as a block is dragged from the menu
+    var tempBlocks: [Int: Block] = [:]
     
     //Take control of that top bar
     let topMenuViewController = TopMenuViewController()
@@ -90,6 +93,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     var blockDropSoundPlayer: AVAudioPlayer?
     var selectSoundPlayer: AVAudioPlayer?
     var trashSoundPlayer: AVAudioPlayer?
+    
+    //A dispatch queue so that blocks can be executed without blocking the UI
+    let serialExecutionQueue = DispatchQueue(label: "blockExecutionQueue")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,9 +120,10 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             }
         }
         
-        //Make the canvas moveable
-        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
+        //Make the canvas moveable, give it an initial size
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handleCanvasPanGesture(_:)))
         canvas.addGestureRecognizer(panGestureRecognizer)
+        canvas.frame = self.view.frame
         
         //Put the trash can out of sight for now
         self.view.sendSubview(toBack: trashImage)
@@ -154,6 +161,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         
         //Select the motion tab by default
         showMotionTab()
+        
+        //Start off with a start block
+        addStartBlock()
     }
 
     override func didReceiveMemoryWarning() {
@@ -211,19 +221,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         print("pressed new program")
         
         //Delete all blocks currently in the workspace
+        //When the start block is deleted, a new one will be created
         for (_, block) in workspaceBlocks {
             deleteBlock(block)
-        }
-        
-        //Creat a new start block
-        //TODO: improve
-        let startView = UIImageView(image: UIImage(named: "control-start"))
-        startView.frame = CGRect(x: self.view.bounds.midX/2.0, y: 150.0, width: 91.0, height: 64.0)
-        newBlock(typeString: "control-start", view: startView)
-        if let tmp = workspaceBlocks[startView] {
-            startBlock = tmp
-        } else {
-            print("There should be a block in the array for the start block now!")
         }
     }
     
@@ -248,12 +248,17 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     //MARK: Gesture Recognizer Functions
     
     //Gesture to move the canvas around
-    @objc func handlePanGesture (_ gesture: UIPanGestureRecognizer) {
+    @objc func handleCanvasPanGesture (_ gesture: UIPanGestureRecognizer) {
         if (gesture.state == UIGestureRecognizerState.changed) {
             //find translation to offset by
             let translation = gesture.translation(in: gesture.view)
             if let view = gesture.view {
                 view.center = CGPoint(x: view.center.x + translation.x, y: view.center.y + translation.y)
+                
+                //Make sure the canvas covers the whole screen still
+                if !view.frame.contains(self.view.bounds){
+                    resizeCanvas()
+                }
             }
             gesture.setTranslation(CGPoint.zero, in: gesture.view)
         }
@@ -262,66 +267,47 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     @objc func handleBlockPanGesture (_ gesture: UIPanGestureRecognizer) {
         switch gesture.state {
         case .began:
+            selectSoundPlayer?.play()
+            self.view.bringSubview(toFront: trashImage)
             if let view = gesture.view as? UIImageView, let block = workspaceBlocks[view] {
                 //if there is a block ahead of us on the chain, moving this block will change that
                 block.detachPreviousBlock()
+                block.bringToFront()
             }
-            self.view.bringSubview(toFront: trashImage)
-        case .changed:
-            //find translation to offset by
-            let translation = gesture.translation(in: gesture.view)
-            if let view = gesture.view as? UIImageView {
-                
-                if isOverTrash(view) {
-                    trashImage.image = UIImage(named: "trash-highlighted")
-                } else {
-                    trashImage.image = UIImage(named: "trash")
-                }
-                
-                //view.center = CGPoint(x: view.center.x + translation.x, y: view.center.y + translation.y)
-                guard let gestureBlock = workspaceBlocks[view] else {
-                    fatalError("No block for panning view!")
-                }
-                
-                var b : Block? = gestureBlock
-                while let block = b {
-                    block.imageView.center = CGPoint(x: block.imageView.center.x + translation.x, y: block.imageView.center.y + translation.y)
-                    b = b?.nextBlock
-                }
-                
-                var foundNeighbor = false
-                for (bView,block) in workspaceBlocks {
-                    if block.nextBlock == nil {
-                        let bx = bView.center.x
-                        let by = bView.center.y
-                        if view.center.x > bx + 50 && view.center.x < bx + 100 && view.center.y > by - 60 && view.center.y < by + 60{
-                            if tempImageViews[gesture.hash] == nil { //TODO: What if you are near 2 blocks?
-                                let tmp = UIImageView(image: view.image)
-                                tmp.alpha = 0.5
-                                tmp.frame = view.frame
-                                tmp.center = CGPoint(x: bx + block.offsetToNext + gestureBlock.offsetToPrevious, y: by - block.offsetY + gestureBlock.offsetY)
-                                canvas.addSubview(tmp)
-                                tempImageViews[gesture.hash] = tmp
-                            }
-                            foundNeighbor = true
-                        }
-                    }
-                }
-                if !foundNeighbor {
-                    if let tmpImageView = tempImageViews[gesture.hash] {
-                        tmpImageView.removeFromSuperview()
-                        tempImageViews[gesture.hash] = nil
-                    }
-                }
-            }
-            gesture.setTranslation(CGPoint.zero, in: gesture.view)
-        case .ended:
             
-            //Get rid of the ghost image if there is one
-            if let tmpView = tempImageViews[gesture.hash] {
-                tmpView.removeFromSuperview()
-                tempImageViews[gesture.hash] = nil
+        case .changed:
+            //find the view and the translation to offset by
+            let translation = gesture.translation(in: gesture.view)
+            guard let view = gesture.view as? UIImageView else {
+                    fatalError("This gesture should only be attached to an image view")
             }
+                
+            //Highlight the trash if we are over it
+            if isOverTrash(view) {
+                trashImage.isHighlighted = true
+            } else {
+                trashImage.isHighlighted = false
+            }
+            
+            //Move each block in the chain by the translation amount
+            guard let gestureBlock = workspaceBlocks[view] else {
+                fatalError("No block for panning view!")
+            }
+            gestureBlock.imageView.center = CGPoint(x: gestureBlock.imageView.center.x + translation.x, y: gestureBlock.imageView.center.y + translation.y)
+            gestureBlock.positionChainImages()
+            gesture.setTranslation(CGPoint.zero, in: gesture.view)
+            
+            //Look for a block that could be connected to and produce a ghost image
+            if let attachableBlock = blockAttachable(to: gestureBlock) {
+                addGhostImage(of: view, at: gestureBlock.centerPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+            } else {
+                removeGhostImage(forGesture: gesture.hash)
+            }
+            
+            
+        case .ended:
+            //Get rid of the ghost image if there is one
+            removeGhostImage(forGesture: gesture.hash)
             
             guard let view = gesture.view as? UIImageView else {
                 fatalError("The view for this type of gesture should have been an image view.")
@@ -331,36 +317,18 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             self.view.sendSubview(toBack: trashImage)
             //check to see if we are over the trash can and if so, delete blocks
             if isOverTrash(view) {
-                trashImage.image = UIImage(named: "trash") //reset for next drag
+                trashImage.isHighlighted = false //reset for next drag
                 deleteBlockChain(startingWith: view)
                 return
             }
             
-            
-            for (bView,block) in workspaceBlocks {
-                if block.nextBlock == nil {
-                    var bx = bView.center.x
-                    var by = bView.center.y
-                    if view.center.x > bx + 50 && view.center.x < bx + 100 && view.center.y > by - 60 && view.center.y < by + 60{
-                        view.center = CGPoint(x: bx + 63, y: by)
-                        if let b = workspaceBlocks[view] {
-                            block.attachBlock(b)
-                            var tmp : Block? = b
-                            while let nextBlock = tmp {
-                                guard let offsetX = nextBlock.previousBlock?.offsetToNext, let offsetY = nextBlock.previousBlock?.offsetY else {
-                                    fatalError("There should be an offset to use here!")
-                                }
-                                nextBlock.imageView.center = CGPoint(x: bx + offsetX + nextBlock.offsetToPrevious, y: by - offsetY + nextBlock.offsetY)
-                                bx = nextBlock.imageView.center.x
-                                by = nextBlock.imageView.center.y
-                                tmp = tmp?.nextBlock
-                            }
-                        } else {
-                            fatalError("No block for attaching view!")
-                        }
-                        blockDropSoundPlayer?.play()
-                    }
-                }
+            //Look for a block to attach to and attach if possible
+            guard let gestureBlock = workspaceBlocks[view] else {
+                fatalError("No block for panning view!")
+            }
+            if let attachBlock = blockAttachable(to: gestureBlock) {
+                attachBlock.attachBlock(gestureBlock)
+                blockDropSoundPlayer?.play()
             }
             
         default: ()
@@ -368,49 +336,272 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     }
     
     @objc func handleDragBlockFromMenu (_ gesture: UIPanGestureRecognizer){
-        //print("\(gesture.hash)")
+        
         switch gesture.state {
         case .began:
-            //print ("began")
             selectSoundPlayer?.play()
-            if let gestureImageView = gesture.view as? UIImageView {
-                let tempView = UIImageView(image: gestureImageView.image)
-                tempView.frame = gestureImageView.frame
-                tempView.center = gesture.location(in: self.view)
-                self.view.addSubview(tempView)
-                tempImageViews[gesture.hash] = tempView
+            guard let gestureImageView = gesture.view as? UIImageView else {
+                fatalError("The view for this gesture should be an image view.")
             }
-        case .changed:
-            if let view = tempImageViews[gesture.hash] {
-                let translation = gesture.translation(in: gesture.view)
-                view.center = CGPoint(x: view.center.x + translation.x, y: view.center.y + translation.y)
-            }
-            gesture.setTranslation(CGPoint.zero, in: gesture.view)
-        case .ended:
-            //print ("ended")
             guard let id = gesture.view?.restorationIdentifier else {
                 fatalError("Could not get id for new block.")
             }
-            if let tempView = tempImageViews[gesture.hash] {
-                tempView.removeFromSuperview()
-                newBlock(typeString: id, view: tempView)
-                tempImageViews[gesture.hash] = nil
+            
+            let tempView = UIImageView(image: gestureImageView.image)
+            tempView.frame = gestureImageView.frame
+            tempView.center = gesture.location(in: self.view)
+            self.view.addSubview(tempView)
+            let tempBlock = Block(withTypeFromString: id, withView: tempView)
+            tempBlocks[gesture.hash] = tempBlock
+            
+        case .changed:
+            guard let tempBlock = tempBlocks[gesture.hash] else {
+                fatalError("there should be a temp block here")
             }
-            //blockDropSoundPlayer?.play()
-        default:
-            print("default")
+
+            //do the translation
+            let translation = gesture.translation(in: gesture.view)
+            tempBlock.imageView.center = CGPoint(x: tempBlock.imageView.center.x + translation.x, y: tempBlock.imageView.center.y + translation.y)
+            gesture.setTranslation(CGPoint.zero, in: gesture.view)
+            
+            //Look for a block that could be connected to and produce a ghost image
+            if let attachableBlock = blockAttachable(to: tempBlock) {
+                addGhostImage(of: tempBlock.imageView, at: tempBlock.centerPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+            } else {
+                removeGhostImage(forGesture: gesture.hash)
+            }
+            
+        case .ended:
+            removeGhostImage(forGesture: gesture.hash)
+            
+            guard let tempBlock = tempBlocks[gesture.hash] else {
+                fatalError("there should be a temp block here")
+            }
+            
+            tempBlock.imageView.removeFromSuperview()
+            tempBlocks[gesture.hash] = nil
+            
+            // if the block is dropped back onto the menu, discard
+            // otherwise add to workspace
+            if tabsView.frame.origin.y > tempBlock.imageView.frame.origin.y {
+                addBlockToWorkspace(tempBlock)
+                if let attachBlock = blockAttachable(to: tempBlock) {
+                    attachBlock.attachBlock(tempBlock)
+                    blockDropSoundPlayer?.play()
+                }
+            }
+            
+        default: ()
         }
     }
     
-    @objc func handleTapMenuBlock(_ gesture: UITapGestureRecognizer){
-        guard let view = gesture.view as? UIImageView, let block = menuBlocks[view] else {
-            fatalError("Could not find the menu block to execute!")
+    @objc func handleTapBlock(_ gesture: UITapGestureRecognizer){
+        guard let view = gesture.view as? UIImageView else {
+            fatalError("Could not find the view for the gesture?!")
         }
         
-        executeBlock(block)
+        if let block = menuBlocks[view] {
+            executeBlock(block)
+        } else if let block = workspaceBlocks[view] {
+            executeBlock(block)
+        } else {
+            fatalError("Could not find block to execute!")
+        }
+    }
+    
+    
+    //MARK: Methods for dealing with blocks
+    
+    func setupMenuBlock(_ imageView: UIImageView){
+        imageView.isUserInteractionEnabled = true
+        
+        //Add a gesture recognizer so that you can drag a new block from each menu block
+        let gestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handleDragBlockFromMenu(_:)))
+        imageView.addGestureRecognizer(gestureRecognizer)
+        
+        //Add a gesture recognizer so that you can tap a block to execute
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapBlock(_:)))
+        imageView.addGestureRecognizer(tapRecognizer)
+        
+        menuBlocks[imageView] = Block(withTypeFromString: imageView.restorationIdentifier ?? "unknown", withView: imageView)
+    }
+    
+
+    func addBlockToWorkspace(_ block: Block) {
+        
+        let view = block.imageView
+        
+        if workspaceBlocks[view] != nil{
+            print("why does this view already have a block??")
+        }
+        
+        //setup the view to be moveable
+        view.isUserInteractionEnabled = true
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handleBlockPanGesture(_:)))
+        view.addGestureRecognizer(panGestureRecognizer)
+        
+        //Add a gesture recognizer so that you can tap a block to execute
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapBlock(_:)))
+        view.addGestureRecognizer(tapRecognizer)
+        
+        //All this just to add a shadow
+        view.layer.shadowColor = UIColor.lightGray.cgColor
+        view.layer.shadowOpacity = 1
+        view.layer.shadowOffset = CGSize(width: 0.0, height: 2.0)
+        view.layer.shadowRadius = 1
+        //view.layer.shouldRasterize = true //TODO: maybe rasterize?
+        
+        //put the image view in the coordinate system of the canvas and add
+        view.frame.origin.x = view.frame.origin.x - canvas.frame.origin.x
+        view.frame.origin.y = view.frame.origin.y - canvas.frame.origin.y
+        canvas.addSubview(view)
+        workspaceBlocks[view] = block
+    }
+    
+    func addStartBlock() {
+        print("Adding start block")
+        //Creat a new start block
+        //TODO: improve
+        let startView = UIImageView(image: UIImage(named: "control-start"))
+        startView.frame = CGRect(x: self.view.bounds.midX/4.0, y: 150.0, width: 91.0, height: 64.0)
+        startBlock = Block(withTypeFromString: "control-start", withView: startView)
+        addBlockToWorkspace(startBlock!)
+    }
+    
+    func deleteBlockChain(startingWith view: UIImageView){
+        guard let firstBlock = workspaceBlocks[view] else {
+            fatalError("Why doesn't this view have a block attached to delete?")
+        }
+        
+        trashSoundPlayer?.play()
+        
+        var nextBlock: Block? = firstBlock
+        while let block = nextBlock {
+            nextBlock = block.nextBlock
+            deleteBlock(block)
+        }
+    }
+    
+    func deleteBlock(_ block: Block){
+        if block == startBlock { addStartBlock() } //if we delete the start block, add a new one
+        block.imageView.removeFromSuperview()
+        workspaceBlocks[block.imageView] = nil
+    }
+    
+    //TODO: improve this function
+    func executeBlock(_ block: Block){
+        guard let finchID = topMenuViewController.finchID else {
+            print("No robot selected, nothing to run on.")
+            return
+        }
+        
+        if topMenuViewController.isConnected {
+            guard let finch = BLECentralManager.shared.robotForID(finchID) as? FinchPeripheral else {
+                print("Could not find finch for id given. Can not run program.")
+                return
+            }
+            serialExecutionQueue.async {
+                block.execute(on: finch)
+            }
+        } else {
+            print ("Cannot run if robot is not connected.")
+        }
+    }
+    
+    func isOverTrash(_ view: UIImageView) -> Bool{
+        //print("\(view.center.x) \(trashImage.center.x) \(view.center.y) \(trashImage.center.y)")
+        if view.center.x > trashImage.center.x - 50.0 &&
+            view.center.x < trashImage.center.x + 50.0 &&
+            view.center.y > trashImage.center.y - 55.0 &&
+            view.center.y < trashImage.center.y + 55.0 {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    //This function returns the block in the workspace that the block
+    //should attach to if dropped (or nil if not close enough to any)
+    //Should probably find the closest, but this isn't usually an issue
+    //TODO: make sure you never return the same block?
+    func blockAttachable (to block: Block) -> Block? {
+        var xOffset: CGFloat = 0.0
+        var yOffset: CGFloat = 0.0
+        //if this block hasn't been added to the workspace yet,
+        //must offset by canvas position
+        if workspaceBlocks[block.imageView] == nil {
+            xOffset = canvas.frame.origin.x
+            yOffset = canvas.frame.origin.y
+        }
+        
+        var attachBlock: Block? = nil
+        if block.type != .controlStart { //controlStart does not snap to anything
+            for (_, workspaceBlock) in workspaceBlocks {
+                let minX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious - 10.0 + xOffset
+                let maxX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious + block.imageView.frame.width / 2.0 + xOffset
+                let minY = workspaceBlock.imageView.center.y - block.imageView.frame.height + yOffset
+                let maxY = workspaceBlock.imageView.center.y + block.imageView.frame.height + yOffset
+                //if workspaceBlock.nextBlock == nil && block.isInAttachSpace(of: workspaceBlock){
+                if workspaceBlock.nextBlock == nil &&
+                    block.imageView.center.x > minX && block.imageView.center.x < maxX &&
+                    block.imageView.center.y > minY && block.imageView.center.y < maxY{
+                    attachBlock = workspaceBlock
+                // If this is a repeat block, also check if this can be connected as a sub block
+                } else if workspaceBlock.type == .controlRepeat {
+                    let minX = workspaceBlock.imageView.center.x - 20.0 + xOffset
+                    let maxX = workspaceBlock.imageView.center.x + xOffset
+                    let minY = workspaceBlock.imageView.center.y - workspaceBlock.offsetY - block.imageView.frame.height + yOffset
+                    let maxY = workspaceBlock.imageView.center.y - workspaceBlock.offsetY + block.imageView.frame.height + yOffset
+                    if workspaceBlock.blockChainToRepeat == nil &&
+                        block.imageView.center.x > minX && block.imageView.center.x < maxX &&
+                        block.imageView.center.y > minY && block.imageView.center.y < maxY{
+                        attachBlock = workspaceBlock
+                    }
+                }
+            }
+        }
+        return attachBlock
     }
     
     //MARK: Other
+    
+    //TODO: maybe make it so that some block has to be on the screen?
+    func resizeCanvas() {
+        if canvas.frame.origin.y > self.view.bounds.origin.y {
+            canvas.frame.origin.y = 0
+        } else if canvas.frame.origin.y + canvas.frame.size.height < self.view.bounds.size.height {
+            canvas.frame.size.height = self.view.bounds.size.height - canvas.frame.origin.y
+        }
+        
+        if canvas.frame.origin.x > self.view.bounds.origin.x {
+            canvas.frame.origin.x = 0
+        } else if canvas.frame.origin.x + canvas.frame.size.width < self.view.bounds.size.width {
+            canvas.frame.size.width = self.view.bounds.size.width - canvas.frame.origin.x
+        }
+    }
+    
+    func addGhostImage (of view: UIImageView, at position: CGPoint, forGesture hash: Int) {
+        if ghostImageViews[hash] == nil {
+            //let tmp = UIImageView(image: view.image)
+            //tmp.alpha = 0.5
+            
+            let tmpImage = view.image?.withRenderingMode(.alwaysTemplate)
+            let tmp = UIImageView(image: tmpImage)
+            tmp.tintColor = UIColor.lightGray
+            
+            tmp.frame = view.frame
+            tmp.center = position
+            canvas.addSubview(tmp)
+            canvas.sendSubview(toBack: tmp)
+            ghostImageViews[hash] = tmp
+        }
+    }
+    func removeGhostImage (forGesture hash: Int) {
+        if let tmp = ghostImageViews[hash] {
+            tmp.removeFromSuperview()
+            ghostImageViews[hash] = nil
+        }
+    }
     
     //Figure out which menu should be showing and what tabs should be available
     //based on what level and tab have been selected
@@ -454,90 +645,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             }
         default:
             fatalError("Show tab for unrecognized level.")
-        }
-    }
-    
-    func setupMenuBlock(_ imageView: UIImageView){
-        imageView.isUserInteractionEnabled = true
-        
-        //Add a gesture recognizer so that you can drag a new block from each menu block
-        let gestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handleDragBlockFromMenu(_:)))
-        imageView.addGestureRecognizer(gestureRecognizer)
-        
-        //Add a gesture recognizer so that you can tap a block to execute
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapMenuBlock(_:)))
-        imageView.addGestureRecognizer(tapRecognizer)
-        
-        menuBlocks[imageView] = Block(withTypeFromString: imageView.restorationIdentifier ?? "unknown", withView: imageView)
-    }
-    
-    func newBlock(typeString: String, view: UIImageView) {
-        if workspaceBlocks[view] != nil{
-            print("why does this view already have a block??")
-        }
-        
-        //setup the view to be moveable
-        view.isUserInteractionEnabled = true
-        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handleBlockPanGesture(_:)))
-        view.addGestureRecognizer(panGestureRecognizer)
-        
-        //All this just to add a shadow
-        view.layer.shadowColor = UIColor.lightGray.cgColor
-        view.layer.shadowOpacity = 1
-        view.layer.shadowOffset = CGSize(width: 0.0, height: 2.0)
-        view.layer.shadowRadius = 1
-        //view.layer.shouldRasterize = true
-        
-        canvas.addSubview(view)
-        workspaceBlocks[view] = Block(withTypeFromString: typeString, withView: view)
-    }
-    
-    func deleteBlockChain(startingWith view: UIImageView){
-        guard let firstBlock = workspaceBlocks[view] else {
-            fatalError("Why doesn't this view have a block attached to delete?")
-        }
-        
-        trashSoundPlayer?.play()
-        
-        var nextBlock: Block? = firstBlock
-        while let block = nextBlock {
-            nextBlock = block.nextBlock
-            deleteBlock(block)
-        }
-    }
-    
-    func deleteBlock(_ block: Block){
-        block.imageView.removeFromSuperview()
-        workspaceBlocks[block.imageView] = nil
-    }
-    
-    //TODO: improve this function
-    func executeBlock(_ block: Block){
-        guard let finchID = topMenuViewController.finchID else {
-            print("No robot selected, nothing to run on.")
-            return
-        }
-        
-        if topMenuViewController.isConnected {
-            guard let finch = BLECentralManager.shared.robotForID(finchID) as? FinchPeripheral else {
-                print("Could not find finch for id given. Can not run program.")
-                return
-            }
-            block.execute(on: finch)
-        } else {
-            print ("Cannot run if robot is not connected.")
-        }
-    }
-    
-    func isOverTrash(_ view: UIImageView) -> Bool{
-        //print("\(view.center.x) \(trashImage.center.x) \(view.center.y) \(trashImage.center.y)")
-        if view.center.x > trashImage.center.x - 50.0 &&
-            view.center.x < trashImage.center.x + 50.0 &&
-            view.center.y > trashImage.center.y - 55.0 &&
-            view.center.y < trashImage.center.y + 55.0 {
-            return true
-        } else {
-            return false
         }
     }
 }

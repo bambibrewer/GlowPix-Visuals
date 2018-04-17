@@ -19,11 +19,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NPx-If-7ij">
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NPx-If-7ij">
                                 <rect key="frame" x="-50" y="0.0" width="767" height="275"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="trash" translatesAutoresizingMaskIntoConstraints="NO" id="4dj-IX-Jl5">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="trash" highlightedImage="trash-highlighted" translatesAutoresizingMaskIntoConstraints="NO" id="4dj-IX-Jl5">
                                 <rect key="frame" x="587" y="200" width="50" height="55"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="4dj-IX-Jl5" secondAttribute="height" multiplier="10:11" id="BxN-6v-692"/>
@@ -391,13 +392,9 @@
                             <constraint firstItem="4dj-IX-Jl5" firstAttribute="bottom" secondItem="C1X-AD-dZ9" secondAttribute="top" constant="-20" id="9HK-jm-yxc"/>
                             <constraint firstItem="C1X-AD-dZ9" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="EzS-d4-lcl"/>
                             <constraint firstItem="axE-dg-f0k" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="JZG-um-s8u"/>
-                            <constraint firstItem="NPx-If-7ij" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="-50" id="K63-Ww-gqU"/>
                             <constraint firstItem="axE-dg-f0k" firstAttribute="bottom" secondItem="C1X-AD-dZ9" secondAttribute="top" id="ffI-uU-iwj"/>
-                            <constraint firstItem="C1X-AD-dZ9" firstAttribute="top" secondItem="NPx-If-7ij" secondAttribute="bottom" id="heo-g1-J8r"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="NPx-If-7ij" secondAttribute="trailing" constant="-50" id="m6U-cR-nsc"/>
                             <constraint firstItem="C1X-AD-dZ9" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="qpv-zK-n19"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="4dj-IX-Jl5" secondAttribute="trailing" constant="30" id="u3q-Md-82h"/>
-                            <constraint firstItem="NPx-If-7ij" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="zEk-kT-3GK"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
@@ -581,6 +578,7 @@
         <image name="sound-L1" width="1059" height="853"/>
         <image name="sound-L2" width="1059" height="950"/>
         <image name="trash" width="200" height="220"/>
+        <image name="trash-highlighted" width="200" height="220"/>
         <image name="turn-left" width="1059" height="853"/>
         <image name="turn-left-L2" width="1059" height="950"/>
         <image name="turn-right" width="1059" height="853"/>

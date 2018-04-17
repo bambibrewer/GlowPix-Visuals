@@ -11,6 +11,8 @@ import UIKit
 
 class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewControllerDelegate {
     
+    let executionDuration: UInt32 //The amount of time the block will sleep during execution
+    
     let type: BlockType
     let group: BlockGroup
     let imageView: UIImageView
@@ -26,10 +28,23 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
     var colorPickerButton: UIButton?
     var colorBulbImage: UIImageView?
     
+    //Only for repeat blocks
+    var blockChainToRepeat: Block?
+    
     init(withTypeFromString t: String, withView i: UIImageView) {
         
         type = BlockType.getType(fromString: t)
         imageView = i
+        
+        //Set how long the block will be executed for
+        switch type{
+        case .controlStart, .controlRepeat, .controlWait: executionDuration = 0
+        case .moveForwardL1, .moveBackwardL1, .turnLeftL1, .turnRightL1,
+             .colorRed, .colorYellow, .colorGreen, .colorCyan, .colorBlue,
+             .colorMagenta, .soundL1: executionDuration = 1000000 //one second
+        case .moveForwardL2, .moveBackwardL2, .turnLeftL2, .turnRightL2,
+             .moveStop, .colorOff, .colorWheel, .soundL23: executionDuration = 500000
+        }
         
         //Set the block's offsets so that other block link up properly
         switch type {
@@ -101,6 +116,8 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         }
     }
     
+    //MARK: Color picker methods
+    
     @objc func pickColor(_ sender: UIButton) {
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -123,74 +140,9 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         self.colorBulbImage?.tintColor = color
     }
     
-    func attachBlock (_ b: Block){
-        nextBlock = b
-        b.previousBlock = self
-    }
+    //MARK: Other private methods
     
-    func detachPreviousBlock(){
-        previousBlock?.nextBlock = nil
-        previousBlock = nil
-    }
-    
-    func execute (on finch: FinchPeripheral) {
-        
-        switch group {
-        case .control:
-            switch type {
-            case .controlStart: print("execute control start")
-            case .controlRepeat: print("execute control repeat \(inputField?.text ?? "?") times")
-            case .controlWait: print("execute control wait for \(inputField?.text ?? "?")")
-            default: print("Trying to execute a block in group control that is not listed.")
-            }
-        case .motion:
-            switch type {
-            case .moveForwardL1: print("execute level 1 move forward")
-            case .moveForwardL2: print("execute level 2 move forward by \(inputField?.text ?? "?")")
-            case .moveBackwardL1: print("execute level 1 move backward")
-            case .moveBackwardL2: print("execute level 2 move backward by \(inputField?.text ?? "?")")
-            case .turnLeftL1: print("execute level 1 turn left")
-            case .turnLeftL2: print("execute level 2 turn left by \(inputField?.text ?? "?")")
-            case .turnRightL1: print("execute level 1 turn right")
-            case .turnRightL2: print("execute level 2 turn right by \(inputField?.text ?? "?")")
-            case .moveStop: print("execute move stop")
-            default: print("Trying to execute a block in group motion that is not listed.")
-            }
-            let success = finch.setServo(port: 1, angle: 90)
-            if !success {
-                print("Failed to execute motion.")
-            }
-        case .sound:
-            switch type {
-            case .soundL1: print("execute level 1 sound")
-            case .soundL23: print("execute level 2 and 3 sound: \(inputField?.text ?? "?")")
-            default: print("Trying to execute a block in group sound that is not listed.")
-            }
-        case .color:
-            var intensities: BBTTriLED?
-            switch type {
-            case .colorRed: intensities = BBTTriLED.init(255, 0, 0)
-            case .colorYellow: intensities = BBTTriLED.init(255, 255, 0)
-            case .colorGreen: intensities = BBTTriLED.init(0, 255, 0)
-            case .colorCyan: intensities = BBTTriLED.init(0, 255, 255)
-            case .colorBlue: intensities = BBTTriLED.init(0, 0, 255)
-            case .colorMagenta: intensities = BBTTriLED.init(255, 0, 255)
-            case .colorOff: intensities = BBTTriLED.init(0, 0, 0)
-            case .colorWheel: intensities = getIntenities()
-            default: print("Trying to execute a block in group color that is not listed.")
-            }
-            if let intensities = intensities {
-                let success = finch.setTriLED(port: 1, intensities: intensities)
-                if !success { print("Failed to set color.") }
-            } else {
-                print ("Somehow, the intensity was never set before trying to set led.")
-            }
-        }
-        
-        nextBlock?.execute(on: finch)
-    }
-    
-    func getIntenities() -> BBTTriLED {
+    private func getIntenities() -> BBTTriLED {
         guard let color = colorBulbImage?.tintColor else {
             fatalError("Could not get color from bulb icon")
         }
@@ -209,6 +161,184 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
             fatalError("Failed to get the intensities from the bulb icon")
         }
     }
+    
+    
+    
+    //MARK: Public methods
+    
+    func centerPosition(whenConnectingTo block: Block ) -> CGPoint {
+        var X = block.imageView.center.x + block.offsetToNext + self.offsetToPrevious
+        let Y = block.imageView.center.y - block.offsetY + self.offsetY
+        
+        if block.shouldAttachAsChainToRepeat(self) {
+            X = block.imageView.center.x - 48.0 + self.offsetToPrevious
+        }
+        
+        return CGPoint(x: X, y: Y)
+    }
+    
+    func attachBlock (_ b: Block){
+        
+        if shouldAttachAsChainToRepeat(b)  {
+            blockChainToRepeat = b
+        } else {
+            nextBlock = b
+        }
+        b.previousBlock = self
+        positionChainImages()
+    }
+    
+    func shouldAttachAsChainToRepeat (_ b: Block) -> Bool {
+        //Crude determination of whether this will be a subchain
+        return type == .controlRepeat && imageView.frame.origin.x + 50.0 > b.imageView.frame.origin.x
+    }
+    
+    //Put into position all of the images of a chain connecting to this one
+    func positionChainImages(){
+        if let nextBlock = nextBlock {
+            nextBlock.imageView.center = nextBlock.centerPosition(whenConnectingTo: self)
+            nextBlock.positionChainImages()
+        }
+        if let repeater = blockChainToRepeat {
+            repeater.imageView.center = repeater.centerPosition(whenConnectingTo: self)
+            repeater.positionChainImages()
+        }
+    }
+    
+    func detachPreviousBlock(){
+        if previousBlock?.blockChainToRepeat == self {
+            previousBlock?.blockChainToRepeat = nil
+        }else{
+            previousBlock?.nextBlock = nil
+        }
+        previousBlock = nil
+    }
+    
+    //Bring the image views to the front so that the last in the chain is on top
+    func bringToFront() {
+        imageView.superview?.bringSubview(toFront: imageView)
+        blockChainToRepeat?.bringToFront()
+        nextBlock?.bringToFront()
+    }
+    
+    //This function cannot be run on the main queue
+    func execute (on finch: FinchPeripheral) {
+        
+        var value = ""
+        DispatchQueue.main.sync {
+            value = inputField?.text ?? "?"
+            
+            imageView.alpha = 0.5
+            
+            //TODO: Maybe use the shadow to highlight each block?
+            //imageView.layer.shadowColor = UIColor.yellow.cgColor
+            //imageView.layer.shadowOpacity = 1
+            //imageView.layer.shadowOffset = CGSize.zero
+            //imageView.layer.shadowRadius = 5
+        }
+        
+        switch group {
+        case .control:
+            switch type {
+            case .controlStart: print("execute control start")
+            case .controlRepeat:
+                print("execute control repeat \(value) times")
+                if let x = Int(value) {
+                    for _ in 0 ..< x {
+                        blockChainToRepeat?.execute(on: finch)
+                    }
+                }
+            case .controlWait:
+                print("execute control wait for \(value)")
+                if let waitTime = UInt32(value) {
+                    usleep(waitTime * 100000)
+                }
+            default: print("Trying to execute a block in group control that is not listed.")
+            }
+        case .motion:
+            switch type {
+            case .moveForwardL1:
+                print("execute level 1 move forward")
+                usleep(executionDuration)
+                print("stop level 1 move forward")
+            case .moveForwardL2:
+                print("execute level 2 move forward by \(value)")
+                usleep(executionDuration)
+                print("stop level 2 move forward")
+            case .moveBackwardL1:
+                print("execute level 1 move backward")
+                usleep(executionDuration)
+                print("stop level 1 move backward")
+            case .moveBackwardL2:
+                print("execute level 2 move backward by \(value)")
+                usleep(executionDuration)
+                print("stop level 2 move backward")
+            case .turnLeftL1:
+                print("execute level 1 turn left")
+                usleep(executionDuration)
+                print("stop level 1 turn left")
+            case .turnLeftL2:
+                print("execute level 2 turn left by \(value)")
+                usleep(executionDuration)
+                print("stop level 2 turn left")
+            case .turnRightL1:
+                print("execute level 1 turn right")
+                usleep(executionDuration)
+                print("stop level 1 turn right")
+            case .turnRightL2:
+                print("execute level 2 turn right by \(value)")
+                usleep(executionDuration)
+                print("stop level 2 turn right")
+            case .moveStop:
+                print("execute move stop")
+                usleep(executionDuration)
+            default: print("Trying to execute a block in group motion that is not listed.")
+            }
+            let success = finch.setServo(port: 1, angle: 90)
+            if !success {
+                print("Failed to execute motion.")
+            }
+        case .sound:
+            switch type {
+            case .soundL1:
+                print("execute level 1 sound")
+                usleep(executionDuration)
+                print("stop level 1 sound")
+            case .soundL23:
+                print("execute level 2 and 3 sound: \(value)")
+                usleep(executionDuration)
+                print("stop level 2 and 3 sound")
+            default: print("Trying to execute a block in group sound that is not listed.")
+            }
+        case .color:
+            var intensities: BBTTriLED?
+            switch type {
+            case .colorRed: intensities = BBTTriLED.init(255, 0, 0)
+            case .colorYellow: intensities = BBTTriLED.init(255, 255, 0)
+            case .colorGreen: intensities = BBTTriLED.init(0, 255, 0)
+            case .colorCyan: intensities = BBTTriLED.init(0, 255, 255)
+            case .colorBlue: intensities = BBTTriLED.init(0, 0, 255)
+            case .colorMagenta: intensities = BBTTriLED.init(255, 0, 255)
+            case .colorOff: intensities = BBTTriLED.init(0, 0, 0)
+            case .colorWheel:
+                DispatchQueue.main.sync { intensities = getIntenities() }
+            default: print("Trying to execute a block in group color that is not listed.")
+            }
+            if let intensities = intensities {
+                let success = finch.setTriLED(port: 1, intensities: intensities)
+                if !success { print("Failed to set color.") }
+                usleep(executionDuration)
+            } else {
+                print ("Somehow, the intensity was never set before trying to set led.")
+            }
+        }
+        
+        DispatchQueue.main.sync { imageView.alpha = 1.0 }
+        
+        nextBlock?.execute(on: finch)
+    }
+    
+    
     
 }
 
