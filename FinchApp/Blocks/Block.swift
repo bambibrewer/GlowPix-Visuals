@@ -16,8 +16,8 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
     let type: BlockType
     let group: BlockGroup
     let imageView: UIImageView
-    let offsetToNext: CGFloat //The distance along the x axis to place the next block.
-    let offsetToPrevious: CGFloat //The distance along the x axis to place the previous block
+    var offsetToNext: CGFloat //The distance along the x axis to place the next block.
+    var offsetToPrevious: CGFloat //The distance along the x axis to place the previous block
     let offsetY: CGFloat //The offset on the y axis for blocks that have a text field making them taller
     
     var nextBlock: Block? //the block to be executed after this one
@@ -30,11 +30,15 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
     
     //Only for repeat blocks
     var blockChainToRepeat: Block?
+    var currentWidth: CGFloat //for stretching
+    let originalWidth: CGFloat
     
     init(withTypeFromString t: String, withView i: UIImageView) {
         
         type = BlockType.getType(fromString: t)
         imageView = i
+        originalWidth = i.frame.width
+        currentWidth = i.frame.width
         
         //Set how long the block will be executed for
         switch type{
@@ -98,12 +102,14 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         
         //For level 2 color block, need a button to pick the color
         if type == .colorWheel {
-            let buttonOrigin = CGPoint(x: 28.0, y: 57.0)
-            let buttonSize = CGSize(width: 20.0, height: 20.0)
+            let buttonOrigin = CGPoint(x: 20.0, y: 46.0)
+            let buttonSize = CGSize(width: 35.0, height: 35.0)
             colorPickerButton = UIButton(frame: CGRect(origin: buttonOrigin, size: buttonSize))
             colorPickerButton?.setImage(UIImage.init(named: "Eight-colour-wheel-2D"), for: .normal)
             colorPickerButton?.addTarget(self, action: #selector(pickColor(_:)), for: .touchUpInside)
-            colorPickerButton?.addTarget(self, action: #selector(pickColor(_:)), for: .touchUpOutside)
+            //because we want to keep the color wheel image small, add some space to the button
+            //to make it easier to press
+            colorPickerButton?.contentEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             imageView.addSubview(colorPickerButton!)
             
             let bulbOrigin = CGPoint(x: 20.0, y: 9.0)
@@ -167,50 +173,151 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
     //MARK: Public methods
     
     func centerPosition(whenConnectingTo block: Block ) -> CGPoint {
-        var X = block.imageView.center.x + block.offsetToNext + self.offsetToPrevious
+        let X = block.imageView.center.x + block.offsetToNext + self.offsetToPrevious
         let Y = block.imageView.center.y - block.offsetY + self.offsetY
         
+        /*
         if block.shouldAttachAsChainToRepeat(self) {
-            X = block.imageView.center.x - 48.0 + self.offsetToPrevious
-        }
+            X = block.imageView.frame.origin.x + 34.0 + self.offsetToPrevious
+        }*/
+        
+        return CGPoint(x: X, y: Y)
+    }
+    func centerPosition(whenInsertingInto block: Block ) -> CGPoint {
+        let X = block.imageView.frame.origin.x + 34.0 + self.offsetToPrevious
+        let Y = block.imageView.center.y - block.offsetY + self.offsetY
         
         return CGPoint(x: X, y: Y)
     }
     
+    //Attach a block chain to the back of this one
     func attachBlock (_ b: Block){
+        print("attach block")
         
-        if shouldAttachAsChainToRepeat(b)  {
+        /*if shouldAttachAsChainToRepeat(b)  {
+            if let blockChainToRepeat = blockChainToRepeat {
+                b.attachToChain(blockChainToRepeat)
+            }
             blockChainToRepeat = b
-        } else {
+        } else {*/
+            if let nextBlock = nextBlock {
+                b.attachToChain(nextBlock)
+            }
             nextBlock = b
-        }
+        //}
         b.previousBlock = self
+        b.resizeRepeatBlocks()
+        positionChainImages()
+    }
+    //Insert a block into this one (only for repeat blocks)
+    func insertBlock (_ b: Block){
+        print("insert block")
+        if type != .controlRepeat {
+            fatalError("insert block should only be called for repeat blocks")
+        }
+        
+        if let blockChainToRepeat = blockChainToRepeat {
+            b.attachToChain(blockChainToRepeat)
+        }
+        blockChainToRepeat = b
+        b.previousBlock = self
+        b.resizeRepeatBlocks()
         positionChainImages()
     }
     
-    func shouldAttachAsChainToRepeat (_ b: Block) -> Bool {
-        //Crude determination of whether this will be a subchain
-        return type == .controlRepeat && imageView.frame.origin.x + 50.0 > b.imageView.frame.origin.x
+    //attach block b to the end of this chain
+    func attachToChain (_ b: Block){
+        if nextBlock == nil {
+            nextBlock = b
+            b.previousBlock = self
+        } else {
+            nextBlock?.attachToChain(b)
+        }
     }
+    
+    //How much width is added when adding this to the chain
+    func widthAdded() -> CGFloat {
+        return offsetToNext + offsetToPrevious + (nextBlock?.widthAdded() ?? 0.0)
+    }
+    
+    /*
+    func shouldAttachAsChainToRepeat (_ b: Block) -> Bool {
+        if blockChainToRepeat == b { //if it's already attached as the repeat block
+            return true
+        } else if nextBlock == b {
+            return false
+        //Crude determination of whether this will be a subchain
+        } else if type == .controlRepeat {
+            let minX = imageView.frame.origin.x + 35.0 > b.imageView.frame.origin.x
+            let maxX = imageView.frame.origin.x + 45.0
+            let minY = imageView.frame.origin.y - b.imageView.frame.height
+            let maxY = imageView.frame.origin.y + b.imageView.frame.height
+            return true
+        } else {
+            return false
+        }
+    }get rid of this function*/
     
     //Put into position all of the images of a chain connecting to this one
     func positionChainImages(){
+        //print("position chain images")
         if let nextBlock = nextBlock {
             nextBlock.imageView.center = nextBlock.centerPosition(whenConnectingTo: self)
             nextBlock.positionChainImages()
         }
         if let repeater = blockChainToRepeat {
-            repeater.imageView.center = repeater.centerPosition(whenConnectingTo: self)
+            repeater.imageView.center = repeater.centerPosition(whenInsertingInto: self)
             repeater.positionChainImages()
         }
     }
     
+    //Look above for a repeat block that needs to be resized
+    func resizeRepeatBlocks() {
+        print("resize repeat blocks")
+        if let previousBlock = previousBlock {
+            if previousBlock.type == .controlRepeat && previousBlock.blockChainToRepeat == self {
+                previousBlock.resize()
+                previousBlock.positionChainImages()
+            }
+            previousBlock.resizeRepeatBlocks()
+        }
+    }
+    
+    func resize() {
+        print("resize")
+        //right now, control repeat is the only block to resize
+        if type != .controlRepeat {
+            return
+        }
+        
+        var width = originalWidth
+        if let chainWidth = blockChainToRepeat?.chainWidth() {
+            width = chainWidth + 99.0
+        }
+        let deltaWidth = width - originalWidth
+        
+        offsetToPrevious = 73.0 + deltaWidth / 2.0
+        offsetToNext = 73.0 + deltaWidth / 2.0
+        inputField?.frame.origin.x = 106.0 + deltaWidth
+        imageView.frame = CGRect(x: imageView.frame.origin.x, y: imageView.frame.origin.y, width: width, height: imageView.frame.height)
+
+        
+    }
+    
+    func chainWidth() -> CGFloat {
+            return offsetToNext + offsetToPrevious + (nextBlock?.chainWidth() ?? 0.0)
+    }
+    
     func detachPreviousBlock(){
+        print("detach")
         if previousBlock?.blockChainToRepeat == self {
             previousBlock?.blockChainToRepeat = nil
+            previousBlock?.resize()
+            previousBlock?.positionChainImages()
         }else{
             previousBlock?.nextBlock = nil
         }
+        previousBlock?.resizeRepeatBlocks()
         previousBlock = nil
     }
     
@@ -337,7 +444,6 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         
         nextBlock?.execute(on: finch)
     }
-    
     
     
 }

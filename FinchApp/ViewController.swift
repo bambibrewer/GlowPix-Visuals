@@ -95,7 +95,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     var trashSoundPlayer: AVAudioPlayer?
     
     //A dispatch queue so that blocks can be executed without blocking the UI
-    let serialExecutionQueue = DispatchQueue(label: "blockExecutionQueue")
+    //let serialExecutionQueue = DispatchQueue(label: "blockExecutionQueue")
+    let executionQueue = OperationQueue()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -126,7 +127,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         canvas.frame = self.view.frame
         
         //Put the trash can out of sight for now
-        self.view.sendSubview(toBack: trashImage)
+        canvas.addSubview(trashImage)
+        trashImage.isHidden = true
         
         //Setup motion menu blocks
         setupMenuBlock(moveForwardStatic)
@@ -236,6 +238,23 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         }
         
         executeBlock(startBlock)
+        
+        if level == 3 {
+            for (_, block) in workspaceBlocks {
+                if block.type == .controlStart {
+                    executeBlock(block)
+                }
+            }
+        }
+    }
+    
+    func didPressStopAll() {
+        print("User pressed 'stop'")
+        executionQueue.cancelAllOperations() 
+        if let finch = finchCurrentlyConnected() {
+            let success = finch.setAllOutputsToOff()
+            if !success { print("Failed in setting all outputs to off.") }
+        }
     }
     
     func didChangeLevel(to newLevel: Int) {
@@ -268,7 +287,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         switch gesture.state {
         case .began:
             selectSoundPlayer?.play()
-            self.view.bringSubview(toFront: trashImage)
+            trashImage.isHidden = false
             if let view = gesture.view as? UIImageView, let block = workspaceBlocks[view] {
                 //if there is a block ahead of us on the chain, moving this block will change that
                 block.detachPreviousBlock()
@@ -298,8 +317,12 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             gesture.setTranslation(CGPoint.zero, in: gesture.view)
             
             //Look for a block that could be connected to and produce a ghost image
-            if let attachableBlock = blockAttachable(to: gestureBlock) {
+            if let repeatBlock = repeatBlockToInsert(block: gestureBlock) {
+                addGhostImage(of: view, at: gestureBlock.centerPosition(whenInsertingInto: repeatBlock), forGesture: gesture.hash)
+                gestureBlock.bringToFront()
+            } else if let attachableBlock = blockAttachable(to: gestureBlock) {
                 addGhostImage(of: view, at: gestureBlock.centerPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+                gestureBlock.bringToFront()
             } else {
                 removeGhostImage(forGesture: gesture.hash)
             }
@@ -314,7 +337,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             }
             
             //Make the trash can disappear
-            self.view.sendSubview(toBack: trashImage)
+            trashImage.isHidden = true
             //check to see if we are over the trash can and if so, delete blocks
             if isOverTrash(view) {
                 trashImage.isHighlighted = false //reset for next drag
@@ -326,7 +349,10 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             guard let gestureBlock = workspaceBlocks[view] else {
                 fatalError("No block for panning view!")
             }
-            if let attachBlock = blockAttachable(to: gestureBlock) {
+            if let repeatBlock = repeatBlockToInsert(block: gestureBlock) {
+                repeatBlock.insertBlock(gestureBlock)
+                blockDropSoundPlayer?.play()
+            } else if let attachBlock = blockAttachable(to: gestureBlock) {
                 attachBlock.attachBlock(gestureBlock)
                 blockDropSoundPlayer?.play()
             }
@@ -365,7 +391,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             gesture.setTranslation(CGPoint.zero, in: gesture.view)
             
             //Look for a block that could be connected to and produce a ghost image
-            if let attachableBlock = blockAttachable(to: tempBlock) {
+            if let repeatBlock = repeatBlockToInsert(block: tempBlock) {
+                addGhostImage(of: tempBlock.imageView, at: tempBlock.centerPosition(whenInsertingInto: repeatBlock), forGesture: gesture.hash)
+            } else if let attachableBlock = blockAttachable(to: tempBlock) {
                 addGhostImage(of: tempBlock.imageView, at: tempBlock.centerPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
             } else {
                 removeGhostImage(forGesture: gesture.hash)
@@ -385,7 +413,10 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             // otherwise add to workspace
             if tabsView.frame.origin.y > tempBlock.imageView.frame.origin.y {
                 addBlockToWorkspace(tempBlock)
-                if let attachBlock = blockAttachable(to: tempBlock) {
+                if let repeatBlock = repeatBlockToInsert(block: tempBlock) {
+                    repeatBlock.insertBlock(tempBlock)
+                    blockDropSoundPlayer?.play()
+                } else if let attachBlock = blockAttachable(to: tempBlock) {
                     attachBlock.attachBlock(tempBlock)
                     blockDropSoundPlayer?.play()
                 }
@@ -475,9 +506,13 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         
         trashSoundPlayer?.play()
         
-        var nextBlock: Block? = firstBlock
-        while let block = nextBlock {
-            nextBlock = block.nextBlock
+        deleteBlockChain(startingWith: firstBlock)
+    }
+    
+    func deleteBlockChain(startingWith block: Block?) {
+        if let block = block {
+            deleteBlockChain(startingWith: block.nextBlock)
+            deleteBlockChain(startingWith: block.blockChainToRepeat)
             deleteBlock(block)
         }
     }
@@ -490,22 +525,28 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     
     //TODO: improve this function
     func executeBlock(_ block: Block){
-        guard let finchID = topMenuViewController.finchID else {
-            print("No robot selected, nothing to run on.")
-            return
-        }
         
-        if topMenuViewController.isConnected {
-            guard let finch = BLECentralManager.shared.robotForID(finchID) as? FinchPeripheral else {
-                print("Could not find finch for id given. Can not run program.")
-                return
-            }
-            serialExecutionQueue.async {
+        if let finch = finchCurrentlyConnected() {
+            /*serialExecutionQueue.async {
+                block.execute(on: finch)
+            }*/
+            executionQueue.addOperation {
                 block.execute(on: finch)
             }
-        } else {
-            print ("Cannot run if robot is not connected.")
         }
+    }
+    
+    //Return the finch connected if there is one, nil otherwise
+    func finchCurrentlyConnected() -> FinchPeripheral? {
+        if topMenuViewController.isConnected {
+            guard let finchID = topMenuViewController.finchID,
+                let finch = BLECentralManager.shared.robotForID(finchID) as? FinchPeripheral else {
+                print("Could not find connected finch!")
+                return nil
+            }
+            return finch
+        }
+        return nil
     }
     
     func isOverTrash(_ view: UIImageView) -> Bool{
@@ -523,37 +564,19 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     //This function returns the block in the workspace that the block
     //should attach to if dropped (or nil if not close enough to any)
     //Should probably find the closest, but this isn't usually an issue
-    //TODO: make sure you never return the same block?
     func blockAttachable (to block: Block) -> Block? {
-        var xOffset: CGFloat = 0.0
-        var yOffset: CGFloat = 0.0
-        //if this block hasn't been added to the workspace yet,
-        //must offset by canvas position
-        if workspaceBlocks[block.imageView] == nil {
-            xOffset = canvas.frame.origin.x
-            yOffset = canvas.frame.origin.y
-        }
+        let offset = canvasOffset(of: block)
         
         var attachBlock: Block? = nil
         if block.type != .controlStart { //controlStart does not snap to anything
             for (_, workspaceBlock) in workspaceBlocks {
-                let minX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious - 10.0 + xOffset
-                let maxX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious + block.imageView.frame.width / 2.0 + xOffset
-                let minY = workspaceBlock.imageView.center.y - block.imageView.frame.height + yOffset
-                let maxY = workspaceBlock.imageView.center.y + block.imageView.frame.height + yOffset
-                //if workspaceBlock.nextBlock == nil && block.isInAttachSpace(of: workspaceBlock){
-                if workspaceBlock.nextBlock == nil &&
-                    block.imageView.center.x > minX && block.imageView.center.x < maxX &&
-                    block.imageView.center.y > minY && block.imageView.center.y < maxY{
-                    attachBlock = workspaceBlock
-                // If this is a repeat block, also check if this can be connected as a sub block
-                } else if workspaceBlock.type == .controlRepeat {
-                    let minX = workspaceBlock.imageView.center.x - 20.0 + xOffset
-                    let maxX = workspaceBlock.imageView.center.x + xOffset
-                    let minY = workspaceBlock.imageView.center.y - workspaceBlock.offsetY - block.imageView.frame.height + yOffset
-                    let maxY = workspaceBlock.imageView.center.y - workspaceBlock.offsetY + block.imageView.frame.height + yOffset
-                    if workspaceBlock.blockChainToRepeat == nil &&
-                        block.imageView.center.x > minX && block.imageView.center.x < maxX &&
+                if workspaceBlock != block {
+                    let minX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious - 10.0 + offset.x
+                    let maxX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious + block.imageView.frame.width / 2.0 + offset.x
+                    let minY = workspaceBlock.imageView.center.y - block.imageView.frame.height + offset.y
+                    let maxY = workspaceBlock.imageView.center.y + block.imageView.frame.height + offset.y
+                
+                    if block.imageView.center.x > minX && block.imageView.center.x < maxX &&
                         block.imageView.center.y > minY && block.imageView.center.y < maxY{
                         attachBlock = workspaceBlock
                     }
@@ -563,7 +586,41 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         return attachBlock
     }
     
+    //return any repeat block that block can be inserted into
+    func repeatBlockToInsert(block: Block) -> Block? {
+        let offset = canvasOffset(of: block)
+        let minInsertX: CGFloat = 20.0
+        
+        var repeater: Block? = nil
+        for (_, workspaceBlock) in workspaceBlocks {
+            if workspaceBlock.type == .controlRepeat && workspaceBlock != block{
+                let minX = workspaceBlock.imageView.frame.origin.x + minInsertX + offset.x
+                let maxX = workspaceBlock.imageView.frame.origin.x + minInsertX + block.offsetToPrevious + offset.x
+                let minY = workspaceBlock.imageView.frame.origin.y - block.imageView.frame.height + offset.y
+                let maxY = workspaceBlock.imageView.frame.origin.y + block.imageView.frame.height + offset.y
+                if block.imageView.frame.origin.x < maxX && block.imageView.frame.origin.x > minX && block.imageView.frame.origin.y < maxY && block.imageView.frame.origin.y > minY {
+                    repeater = workspaceBlock
+                }
+            }
+        }
+        return repeater
+    }
+    
     //MARK: Other
+    
+    //returns the point of the canvas origin if the block is not yet part of the
+    //workspace, 0 otherwise
+    func canvasOffset(of block: Block) -> CGPoint {
+        var xOffset: CGFloat = 0.0
+        var yOffset: CGFloat = 0.0
+        //if this block hasn't been added to the workspace yet,
+        //must offset by canvas position
+        if workspaceBlocks[block.imageView] == nil {
+            xOffset = canvas.frame.origin.x
+            yOffset = canvas.frame.origin.y
+        }
+        return CGPoint(x: xOffset, y: yOffset)
+    }
     
     //TODO: maybe make it so that some block has to be on the screen?
     func resizeCanvas() {
@@ -581,20 +638,22 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     }
     
     func addGhostImage (of view: UIImageView, at position: CGPoint, forGesture hash: Int) {
-        if ghostImageViews[hash] == nil {
+        //if ghostImageViews[hash] == nil { //would like to only create a ghost if there isn't one, but it seems that some attachment zones can overlap. mostly a problem of the repeat block.
             //let tmp = UIImageView(image: view.image)
             //tmp.alpha = 0.5
+        
+        removeGhostImage(forGesture: hash)
             
-            let tmpImage = view.image?.withRenderingMode(.alwaysTemplate)
-            let tmp = UIImageView(image: tmpImage)
-            tmp.tintColor = UIColor.lightGray
-            
-            tmp.frame = view.frame
-            tmp.center = position
-            canvas.addSubview(tmp)
-            canvas.sendSubview(toBack: tmp)
-            ghostImageViews[hash] = tmp
-        }
+        let tmpImage = view.image?.withRenderingMode(.alwaysTemplate)
+        let tmp = UIImageView(image: tmpImage)
+        tmp.tintColor = UIColor.lightGray
+        
+        tmp.frame = view.frame
+        tmp.center = position
+        canvas.addSubview(tmp)
+        ghostImageViews[hash] = tmp
+        
+        
     }
     func removeGhostImage (forGesture hash: Int) {
         if let tmp = ghostImageViews[hash] {

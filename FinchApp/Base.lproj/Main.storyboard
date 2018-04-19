@@ -283,6 +283,34 @@
                                             <constraint firstItem="r7R-Qw-URh" firstAttribute="centerX" secondItem="lWW-Rc-uNz" secondAttribute="centerX" id="FJh-HU-L2w"/>
                                         </constraints>
                                     </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xx5-SA-PcK" userLabel="Color L2 View">
+                                        <rect key="frame" x="0.0" y="0.0" width="667" height="100"/>
+                                        <subviews>
+                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="7BU-MK-8S1">
+                                                <rect key="frame" x="249.5" y="18" width="168" height="64"/>
+                                                <subviews>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="blank-color" image="blank-color" translatesAutoresizingMaskIntoConstraints="NO" id="KvS-AK-n6s">
+                                                        <rect key="frame" x="0.0" y="0.0" width="80" height="64"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="80" id="o9D-aW-0us"/>
+                                                            <constraint firstAttribute="width" secondItem="KvS-AK-n6s" secondAttribute="height" multiplier="1059:853" id="wpK-lA-Mji"/>
+                                                        </constraints>
+                                                    </imageView>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="color-off-L2" image="color-off" translatesAutoresizingMaskIntoConstraints="NO" id="8A7-V1-rqN">
+                                                        <rect key="frame" x="88" y="0.0" width="80" height="64"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="80" id="Pdc-JK-VFB"/>
+                                                        </constraints>
+                                                    </imageView>
+                                                </subviews>
+                                            </stackView>
+                                        </subviews>
+                                        <color key="backgroundColor" red="0.92143100499999997" green="0.92145264149999995" blue="0.92144101860000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstItem="7BU-MK-8S1" firstAttribute="centerY" secondItem="xx5-SA-PcK" secondAttribute="centerY" id="RUd-0r-Ohe"/>
+                                            <constraint firstItem="7BU-MK-8S1" firstAttribute="centerX" secondItem="xx5-SA-PcK" secondAttribute="centerX" id="RWQ-gk-sYc"/>
+                                        </constraints>
+                                    </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7sS-3p-yYs" userLabel="Control L3 View">
                                         <rect key="frame" x="0.0" y="0.0" width="667" height="100"/>
                                         <subviews>
@@ -317,34 +345,6 @@
                                         <constraints>
                                             <constraint firstItem="4HV-4l-TBT" firstAttribute="centerY" secondItem="7sS-3p-yYs" secondAttribute="centerY" id="Fc1-6C-X8F"/>
                                             <constraint firstItem="4HV-4l-TBT" firstAttribute="centerX" secondItem="7sS-3p-yYs" secondAttribute="centerX" id="hWC-FD-fcU"/>
-                                        </constraints>
-                                    </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xx5-SA-PcK" userLabel="Color L2 View">
-                                        <rect key="frame" x="0.0" y="0.0" width="667" height="100"/>
-                                        <subviews>
-                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="7BU-MK-8S1">
-                                                <rect key="frame" x="249.5" y="18" width="168" height="64"/>
-                                                <subviews>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="blank-color" image="blank-color" translatesAutoresizingMaskIntoConstraints="NO" id="KvS-AK-n6s">
-                                                        <rect key="frame" x="0.0" y="0.0" width="80" height="64"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="width" constant="80" id="o9D-aW-0us"/>
-                                                            <constraint firstAttribute="width" secondItem="KvS-AK-n6s" secondAttribute="height" multiplier="1059:853" id="wpK-lA-Mji"/>
-                                                        </constraints>
-                                                    </imageView>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="color-off-L2" image="color-off" translatesAutoresizingMaskIntoConstraints="NO" id="8A7-V1-rqN">
-                                                        <rect key="frame" x="88" y="0.0" width="80" height="64"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="width" constant="80" id="Pdc-JK-VFB"/>
-                                                        </constraints>
-                                                    </imageView>
-                                                </subviews>
-                                            </stackView>
-                                        </subviews>
-                                        <color key="backgroundColor" red="0.92143100499999997" green="0.92145264149999995" blue="0.92144101860000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <constraints>
-                                            <constraint firstItem="7BU-MK-8S1" firstAttribute="centerY" secondItem="xx5-SA-PcK" secondAttribute="centerY" id="RUd-0r-Ohe"/>
-                                            <constraint firstItem="7BU-MK-8S1" firstAttribute="centerX" secondItem="xx5-SA-PcK" secondAttribute="centerX" id="RWQ-gk-sYc"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -515,6 +515,7 @@
                         </connections>
                     </tableView>
                     <extendedEdge key="edgesForExtendedLayout"/>
+                    <value key="contentSizeForViewInPopover" type="size" width="500" height="300"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="QDQ-NG-fSy" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -574,7 +575,7 @@
         <image name="move-forward" width="1059" height="853"/>
         <image name="move-forward-L2" width="1059" height="950"/>
         <image name="move-stop" width="1059" height="853"/>
-        <image name="repeat-x-times" width="2163" height="1096"/>
+        <image name="repeat-x-times" width="131" height="83"/>
         <image name="sound-L1" width="1059" height="853"/>
         <image name="sound-L2" width="1059" height="950"/>
         <image name="trash" width="200" height="220"/>

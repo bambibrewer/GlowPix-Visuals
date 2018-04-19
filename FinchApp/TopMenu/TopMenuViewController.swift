@@ -12,6 +12,7 @@ import CoreBluetooth
 protocol TopMenuViewControllerDelegate {
     func didPressNewProgramButton()
     func didPressRunProgramButton()
+    func didPressStopAll()
     func didChangeLevel(to newLevel: Int)
 }
 
@@ -34,7 +35,7 @@ class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDe
     var currentLevel: Int = 1
     
     var foundRobots: [(robot:CBPeripheral,ss:NSNumber)] = []
-    var header = "Select Robot"
+    var header = "Choose your Finch"
     var robotListVC: RobotsTableViewController?
     
     //TODO: put global variables somewhere
@@ -118,6 +119,9 @@ class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDe
     }
     @IBAction func runProgram(_ sender: Any) {
         delegate?.didPressRunProgramButton()
+    }
+    @IBAction func stopAll(_ sender: Any) {
+        delegate?.didPressStopAll()
     }
     @IBAction func changeLevel(_ sender: UIButton) {
         

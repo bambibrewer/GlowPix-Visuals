@@ -104,6 +104,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
 		
 		self.discoveredPeripherals.removeAll()
 		self._discoveredPeripheralsSeqeuntial = []
+        self.displayDiscoveredPeripherals = []
 		
 		self.robotDiscoveredBlock = updateDiscovered
 		self.scanStoppedBlock = scanEnded
