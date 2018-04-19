@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		311E21B8207E588900D24B59 /* HSBColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21B7207E588900D24B59 /* HSBColorPicker.swift */; };
 		311E21BF207E7BA800D24B59 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */; };
+		311E21C12088E56900D24B59 /* BlockExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21C02088E56800D24B59 /* BlockExecution.swift */; };
 		315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315C307D207A6EB100597549 /* LevelTableViewController.swift */; };
 		31934E0C2063F0B200B999DD /* BBTRobotBLEPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0A2063F0B200B999DD /* BBTRobotBLEPeripheral.swift */; };
 		31934E0D2063F0B200B999DD /* HummingbirdPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0B2063F0B200B999DD /* HummingbirdPeripheral.swift */; };
@@ -54,6 +55,7 @@
 /* Begin PBXFileReference section */
 		311E21B7207E588900D24B59 /* HSBColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HSBColorPicker.swift; sourceTree = "<group>"; };
 		311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
+		311E21C02088E56800D24B59 /* BlockExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockExecution.swift; sourceTree = "<group>"; };
 		315C307D207A6EB100597549 /* LevelTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelTableViewController.swift; sourceTree = "<group>"; };
 		31934E0A2063F0B200B999DD /* BBTRobotBLEPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBTRobotBLEPeripheral.swift; sourceTree = "<group>"; };
 		31934E0B2063F0B200B999DD /* HummingbirdPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HummingbirdPeripheral.swift; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 				31A353FC20615E97003928E9 /* Block.swift */,
 				311E21B7207E588900D24B59 /* HSBColorPicker.swift */,
 				311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */,
+				311E21C02088E56800D24B59 /* BlockExecution.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -348,6 +351,7 @@
 				31A353FD20615E97003928E9 /* Block.swift in Sources */,
 				31934E172063F32400B999DD /* FinchPeripheral.swift in Sources */,
 				31934E0C2063F0B200B999DD /* BBTRobotBLEPeripheral.swift in Sources */,
+				311E21C12088E56900D24B59 /* BlockExecution.swift in Sources */,
 				31934E192063F32C00B999DD /* FlutterPeripheral.swift in Sources */,
 				315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */,
 				31CC1A812061807E00548D12 /* RobotsTableViewController.swift in Sources */,

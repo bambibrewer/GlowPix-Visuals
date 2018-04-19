@@ -148,7 +148,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
     
     //MARK: Other private methods
     
-    private func getIntenities() -> BBTTriLED {
+    func getIntenities() -> BBTTriLED {
         guard let color = colorBulbImage?.tintColor else {
             fatalError("Could not get color from bulb icon")
         }
@@ -328,6 +328,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         nextBlock?.bringToFront()
     }
     
+    /*
     //This function cannot be run on the main queue
     func execute (on finch: FinchPeripheral) {
         
@@ -444,7 +445,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         
         nextBlock?.execute(on: finch)
     }
-    
+    */
     
 }
 

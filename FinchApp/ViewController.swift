@@ -81,6 +81,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     var menuBlocks:[UIImageView:Block] = [:] //these are static blocks in the menu.
     
     //What block will be executed when the user presses run in the top menu?
+    //TODO: do we need this for level 3?
     var startBlock: Block?
     
     //What level are we currently on?
@@ -530,9 +531,12 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             /*serialExecutionQueue.async {
                 block.execute(on: finch)
             }*/
-            executionQueue.addOperation {
+            /*executionQueue.addOperation {
                 block.execute(on: finch)
-            }
+            }*/
+            
+            let blockOperation = BlockExecution(of: block, on: finch)
+            executionQueue.addOperation(blockOperation)
         }
     }
     
