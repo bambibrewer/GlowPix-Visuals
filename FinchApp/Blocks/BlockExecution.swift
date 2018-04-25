@@ -67,39 +67,41 @@ class BlockExecution: Operation {
             }
         case .motion:
             switch block.type {
+            //Level 1
             case .moveForwardL1:
                 print("execute level 1 move forward")
                 usleep(block.executionDuration)
                 print("stop level 1 move forward")
-            case .moveForwardL2:
-                print("execute level 2 move forward by \(value)")
-                usleep(block.executionDuration)
-                print("stop level 2 move forward")
             case .moveBackwardL1:
                 print("execute level 1 move backward")
                 usleep(block.executionDuration)
                 print("stop level 1 move backward")
-            case .moveBackwardL2:
-                print("execute level 2 move backward by \(value)")
-                usleep(block.executionDuration)
-                print("stop level 2 move backward")
             case .turnLeftL1:
                 print("execute level 1 turn left")
                 usleep(block.executionDuration)
                 print("stop level 1 turn left")
-            case .turnLeftL2:
-                print("execute level 2 turn left by \(value)")
-                usleep(block.executionDuration)
-                print("stop level 2 turn left")
             case .turnRightL1:
                 print("execute level 1 turn right")
                 usleep(block.executionDuration)
                 print("stop level 1 turn right")
+            //Level 2
+            case .moveForwardL2:
+                print("execute level 2 move forward by \(value)")
+                usleep(block.executionDuration)
+                print("stop level 2 move forward")
+            case .moveBackwardL2:
+                print("execute level 2 move backward by \(value)")
+                usleep(block.executionDuration)
+                print("stop level 2 move backward")
+            case .turnLeftL2:
+                print("execute level 2 turn left by \(value)")
+                usleep(block.executionDuration)
+                print("stop level 2 turn left")
             case .turnRightL2:
                 print("execute level 2 turn right by \(value)")
                 usleep(block.executionDuration)
                 print("stop level 2 turn right")
-            case .moveStop:
+            case .moveStopL2:
                 print("execute move stop")
                 usleep(block.executionDuration)
             default: print("Trying to execute a block in group motion that is not listed.")
@@ -114,10 +116,14 @@ class BlockExecution: Operation {
                 print("execute level 1 sound")
                 usleep(block.executionDuration)
                 print("stop level 1 sound")
-            case .soundL23:
-                print("execute level 2 and 3 sound: \(value)")
+            case .soundL2:
+                print("execute level 2 sound: \(value)")
                 usleep(block.executionDuration)
-                print("stop level 2 and 3 sound")
+                print("stop level 2 sound")
+            case .soundL3:
+                print("execute level 3 sound: \(value)")
+                usleep(block.executionDuration)
+                print("stop level 3 sound")
             default: print("Trying to execute a block in group sound that is not listed.")
             }
         case .color:
@@ -129,8 +135,8 @@ class BlockExecution: Operation {
             case .colorCyan: intensities = BBTTriLED.init(0, 255, 255)
             case .colorBlue: intensities = BBTTriLED.init(0, 0, 255)
             case .colorMagenta: intensities = BBTTriLED.init(255, 0, 255)
-            case .colorOff: intensities = BBTTriLED.init(0, 0, 0)
-            case .colorWheel:
+            case .colorOff, .colorOffL2, .colorOffL3: intensities = BBTTriLED.init(0, 0, 0)
+            case .colorWheelL2, .colorWheelL3:
                 DispatchQueue.main.sync { intensities = block.getIntenities() }
             default: print("Trying to execute a block in group color that is not listed.")
             }

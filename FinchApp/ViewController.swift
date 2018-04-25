@@ -31,6 +31,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     @IBOutlet weak var colorL2TabView: UIView!
     @IBOutlet weak var motionL3TabView: UIView!
     @IBOutlet weak var controlL3TabView: UIView!
+    @IBOutlet weak var colorL3TabView: UIView!
+    @IBOutlet weak var soundL3TabView: UIView!
     
     //Trash can
     @IBOutlet weak var trashImage: UIImageView!
@@ -49,6 +51,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     //Sound Menu Blocks
     @IBOutlet weak var soundStatic: UIImageView!
     @IBOutlet weak var soundL2Static: UIImageView!
+    @IBOutlet weak var soundL3Static: UIImageView!
     
     //Color Menu Blocks
     @IBOutlet weak var colorRedStatic: UIImageView!
@@ -60,6 +63,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     @IBOutlet weak var colorOffStatic: UIImageView!
     @IBOutlet weak var colorBlankStatic: UIImageView!
     @IBOutlet weak var colorOffL2Static: UIImageView!
+    @IBOutlet weak var colorBlankL3Static: UIImageView!
+    @IBOutlet weak var colorOffL3Static: UIImageView!
     
     //Control Menu Blocks
     @IBOutlet weak var controlStartStatic: UIImageView!
@@ -145,6 +150,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         //Setup sound menu blocks
         setupMenuBlock(soundStatic)
         setupMenuBlock(soundL2Static)
+        setupMenuBlock(soundL3Static)
         
         //Setup color menu blocks
         setupMenuBlock(colorRedStatic)
@@ -156,6 +162,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         setupMenuBlock(colorOffStatic)
         setupMenuBlock(colorBlankStatic)
         setupMenuBlock(colorOffL2Static)
+        setupMenuBlock(colorBlankL3Static)
+        setupMenuBlock(colorOffL3Static)
         
         //Setup control menu blocks
         setupMenuBlock(controlStartStatic)
@@ -700,9 +708,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             case .motion:
                 tabsView.bringSubview(toFront: motionL3TabView)
             case .sound:
-                tabsView.bringSubview(toFront: soundL2TabView)
+                tabsView.bringSubview(toFront: soundL3TabView)
             case .color:
-                tabsView.bringSubview(toFront: colorL2TabView)
+                tabsView.bringSubview(toFront: colorL3TabView)
             case .control:
                 tabsView.bringSubview(toFront: controlL3TabView)
             }
