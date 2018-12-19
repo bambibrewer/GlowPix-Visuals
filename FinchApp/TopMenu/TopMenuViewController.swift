@@ -51,6 +51,10 @@ class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDe
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let backgroundImage = UIImage(named: "Blue Background") {
+            view.backgroundColor = UIColor(patternImage: backgroundImage)
+        }
 
         self.connectToFinchButton.setTitle("Connect to Finch", for: .normal)
         connectionStatusLabel.text = "(not connected)"
