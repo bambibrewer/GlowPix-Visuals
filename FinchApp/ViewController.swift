@@ -89,9 +89,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         
         //Add the top menu
         topMenuViewController.delegate = self
-      self.addChild(topMenuViewController)
+      self.addChildViewController(topMenuViewController)
         self.view.addSubview(topMenuViewController.view)
-      topMenuViewController.didMove(toParent: self)
+      topMenuViewController.didMove(toParentViewController: self)
         topMenuViewController.view.frame = CGRect(x: self.view.bounds.minX, y: self.view.bounds.minY, width: self.view.bounds.width, height: 80.0)
         
         
@@ -580,7 +580,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             controlTabButtonWidth.constant = 0
             switch tabSelected {
             case .motion:
-               tabsView.bringSubviewToFront(motionTabView)
+               tabsView.bringSubview(toFront: motionTabView)
             case .control:
                 showMotionTab()  //TODO: Test this
             }
@@ -588,7 +588,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             controlTabButtonWidth.constant = 0
             switch tabSelected {
             case .motion:
-               tabsView.bringSubviewToFront(motionL2TabView)
+               tabsView.bringSubview(toFront: motionL2TabView)
             case .control:
                 showMotionTab()
             }
@@ -596,9 +596,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             controlTabButtonWidth.constant = 80
             switch tabSelected {
             case .motion:
-               tabsView.bringSubviewToFront(motionL3TabView)
+               tabsView.bringSubview(toFront: motionL3TabView)
             case .control:
-               tabsView.bringSubviewToFront(controlL3TabView)
+               tabsView.bringSubview(toFront: controlL3TabView)
             }
         default:
             fatalError("Show tab for unrecognized level.")
