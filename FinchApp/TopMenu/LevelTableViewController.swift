@@ -26,11 +26,6 @@ class LevelTableViewController: UITableViewController {
         
         self.tableView.selectRow(at: IndexPath.init(row: levelSelected - 1, section: 0), animated: false, scrollPosition: UITableViewScrollPosition.none)
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,7 +40,7 @@ class LevelTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return 5
     }
 
     

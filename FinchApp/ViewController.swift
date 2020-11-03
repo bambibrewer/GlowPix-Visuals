@@ -16,23 +16,18 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
 
     //So that we can change the look of the menu tabs to show what is selected/available
     @IBOutlet weak var motionTabButtonHeight: NSLayoutConstraint!
-    @IBOutlet weak var soundTabButtonHeight: NSLayoutConstraint!
-    @IBOutlet weak var colorTabButtonHeight: NSLayoutConstraint!
+
     @IBOutlet weak var controlTabButtonHeight: NSLayoutConstraint!
     @IBOutlet weak var controlTabButtonWidth: NSLayoutConstraint!
     
     //The views to show for each menu tab at each level
     @IBOutlet weak var tabsView: UIView! //super view of those below
     @IBOutlet weak var motionTabView: UIView!
-    @IBOutlet weak var soundTabView: UIView!
-    @IBOutlet weak var colorTabView: UIView!
+
     @IBOutlet weak var motionL2TabView: UIView!
-    @IBOutlet weak var soundL2TabView: UIView!
-    @IBOutlet weak var colorL2TabView: UIView!
     @IBOutlet weak var motionL3TabView: UIView!
     @IBOutlet weak var controlL3TabView: UIView!
-    @IBOutlet weak var colorL3TabView: UIView!
-    @IBOutlet weak var soundL3TabView: UIView!
+    
     
     //Trash can
     @IBOutlet weak var trashImage: UIImageView!
@@ -48,23 +43,12 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     @IBOutlet weak var turnRightL2Static: UIImageView!
     @IBOutlet weak var moveStopL2Static: UIImageView!
     
-    //Sound Menu Blocks
-    @IBOutlet weak var soundStatic: UIImageView!
-    @IBOutlet weak var soundL2Static: UIImageView!
-    @IBOutlet weak var soundL3Static: UIImageView!
+
     
     //Color Menu Blocks
     @IBOutlet weak var colorRedStatic: UIImageView!
     @IBOutlet weak var colorYellowStatic: UIImageView!
-    @IBOutlet weak var colorGreenStatic: UIImageView!
-    @IBOutlet weak var colorCyanStatic: UIImageView!
-    @IBOutlet weak var colorBlueStatic: UIImageView!
-    @IBOutlet weak var colorMagentaStatic: UIImageView!
-    @IBOutlet weak var colorOffStatic: UIImageView!
-    @IBOutlet weak var colorBlankStatic: UIImageView!
-    @IBOutlet weak var colorOffL2Static: UIImageView!
-    @IBOutlet weak var colorBlankL3Static: UIImageView!
-    @IBOutlet weak var colorOffL3Static: UIImageView!
+   
     
     //Control Menu Blocks
     @IBOutlet weak var controlStartStatic: UIImageView!
@@ -95,10 +79,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     //What tab is being shown now?
     var tabSelected: Tab = .motion
     
-    //Sound Effects
-    var blockDropSoundPlayer: AVAudioPlayer?
-    var selectSoundPlayer: AVAudioPlayer?
-    var trashSoundPlayer: AVAudioPlayer?
     
     //A dispatch queue so that blocks can be executed without blocking the UI
     //let serialExecutionQueue = DispatchQueue(label: "blockExecutionQueue")
@@ -109,23 +89,11 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         
         //Add the top menu
         topMenuViewController.delegate = self
-        self.addChildViewController(topMenuViewController)
+      self.addChild(topMenuViewController)
         self.view.addSubview(topMenuViewController.view)
-        topMenuViewController.didMove(toParentViewController: self)
+      topMenuViewController.didMove(toParent: self)
         topMenuViewController.view.frame = CGRect(x: self.view.bounds.minX, y: self.view.bounds.minY, width: self.view.bounds.width, height: 80.0)
         
-        //Load sound effects
-        if let blockDrop = NSDataAsset(name: "block-drop"),
-            let select = NSDataAsset(name: "block-select and button-click"),
-            let trash = NSDataAsset(name: "trash-sound") {
-            do {
-                try blockDropSoundPlayer = AVAudioPlayer(data: blockDrop.data)
-                try selectSoundPlayer = AVAudioPlayer(data: select.data)
-                try trashSoundPlayer = AVAudioPlayer(data: trash.data)
-            } catch {
-                print ("Could not load sound effects")
-            }
-        }
         
         //Make the canvas moveable, give it an initial size
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handleCanvasPanGesture(_:)))
@@ -147,23 +115,10 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         setupMenuBlock(turnRightL2Static)
         setupMenuBlock(moveStopL2Static)
         
-        //Setup sound menu blocks
-        setupMenuBlock(soundStatic)
-        setupMenuBlock(soundL2Static)
-        setupMenuBlock(soundL3Static)
         
         //Setup color menu blocks
         setupMenuBlock(colorRedStatic)
         setupMenuBlock(colorYellowStatic)
-        setupMenuBlock(colorGreenStatic)
-        setupMenuBlock(colorCyanStatic)
-        setupMenuBlock(colorBlueStatic)
-        setupMenuBlock(colorMagentaStatic)
-        setupMenuBlock(colorOffStatic)
-        setupMenuBlock(colorBlankStatic)
-        setupMenuBlock(colorOffL2Static)
-        setupMenuBlock(colorBlankL3Static)
-        setupMenuBlock(colorOffL3Static)
         
         //Setup control menu blocks
         setupMenuBlock(controlStartStatic)
@@ -188,38 +143,14 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     
     @IBAction func showMotionTab() {
         motionTabButtonHeight.constant = 50
-        soundTabButtonHeight.constant = 30
-        colorTabButtonHeight.constant = 30
         controlTabButtonHeight.constant = 30
         
         tabSelected = .motion
         showTab()
     }
-    
-    @IBAction func showSoundTab() {
-        motionTabButtonHeight.constant = 30
-        soundTabButtonHeight.constant = 50
-        colorTabButtonHeight.constant = 30
-        controlTabButtonHeight.constant = 30
-        
-        tabSelected = .sound
-        showTab()
-    }
-    
-    @IBAction func showColorTab() {
-        motionTabButtonHeight.constant = 30
-        soundTabButtonHeight.constant = 30
-        colorTabButtonHeight.constant = 50
-        controlTabButtonHeight.constant = 30
-        
-        tabSelected = .color
-        showTab()
-    }
 
     @IBAction func showControlTab() {
         motionTabButtonHeight.constant = 30
-        soundTabButtonHeight.constant = 30
-        colorTabButtonHeight.constant = 30
         controlTabButtonHeight.constant = 50
         
         tabSelected = .control
@@ -238,33 +169,33 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         }
     }
     
-    func didPressRunProgramButton() {
-        print("pressed run program")
-        //TODO: some sort of message if there is no start block? or no blocks connected?
-        guard let startBlock = startBlock else {
-            print ("Cannot run when no start block is shown.")
-            return
-        }
-        
-        executeBlock(startBlock)
-        
-        if level == 3 {
-            for (_, block) in workspaceBlocks {
-                if block.type == .controlStart {
-                    executeBlock(block)
-                }
-            }
-        }
-    }
+//    func didPressRunProgramButton() {
+//        print("pressed run program")
+//        //TODO: some sort of message if there is no start block? or no blocks connected?
+//        guard let startBlock = startBlock else {
+//            print ("Cannot run when no start block is shown.")
+//            return
+//        }
+//
+//        executeBlock(startBlock)
+//
+//        if level == 3 {
+//            for (_, block) in workspaceBlocks {
+//                if block.type == .controlStart {
+//                    executeBlock(block)
+//                }
+//            }
+//        }
+//    }
     
-    func didPressStopAll() {
-        print("User pressed 'stop'")
-        executionQueue.cancelAllOperations() 
-        if let finch = finchCurrentlyConnected() {
-            let success = finch.setAllOutputsToOff()
-            if !success { print("Failed in setting all outputs to off.") }
-        }
-    }
+//    func didPressStopAll() {
+//        print("User pressed 'stop'")
+//        executionQueue.cancelAllOperations() 
+//        if let finch = finchCurrentlyConnected() {
+//            let success = finch.setAllOutputsToOff()
+//            if !success { print("Failed in setting all outputs to off.") }
+//        }
+//    }
     
     func didChangeLevel(to newLevel: Int) {
         print("Changed the level to \(newLevel)")
@@ -277,7 +208,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     
     //Gesture to move the canvas around
     @objc func handleCanvasPanGesture (_ gesture: UIPanGestureRecognizer) {
-        if (gesture.state == UIGestureRecognizerState.changed) {
+      if (gesture.state == UIGestureRecognizer.State.changed) {
             //find translation to offset by
             let translation = gesture.translation(in: gesture.view)
             if let view = gesture.view {
@@ -295,7 +226,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     @objc func handleBlockPanGesture (_ gesture: UIPanGestureRecognizer) {
         switch gesture.state {
         case .began:
-            selectSoundPlayer?.play()
             trashImage.isHidden = false
             if let view = gesture.view as? UIImageView, let block = workspaceBlocks[view] {
                 //if there is a block ahead of us on the chain, moving this block will change that
@@ -360,10 +290,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             }
             if let repeatBlock = repeatBlockToInsert(block: gestureBlock) {
                 repeatBlock.insertBlock(gestureBlock)
-                blockDropSoundPlayer?.play()
             } else if let attachBlock = blockAttachable(to: gestureBlock) {
                 attachBlock.attachBlock(gestureBlock)
-                blockDropSoundPlayer?.play()
             }
             
         default: ()
@@ -374,7 +302,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         
         switch gesture.state {
         case .began:
-            selectSoundPlayer?.play()
             guard let gestureImageView = gesture.view as? UIImageView else {
                 fatalError("The view for this gesture should be an image view.")
             }
@@ -382,11 +309,13 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
                 fatalError("Could not get id for new block.")
             }
             
-            let tempView = UIImageView(image: gestureImageView.image)
-            tempView.frame = gestureImageView.frame
+         let tempView = UIImageView(image: UIImage(named: "glowpix-block-white"))//UIImageView(image: gestureImageView.image)
+            //tempView.frame = gestureImageView.frame    // Set frame using block height
             tempView.center = gesture.location(in: self.view)
             self.view.addSubview(tempView)
-            let tempBlock = Block(withTypeFromString: id, withView: tempView)
+         print("stashing block")
+            let tempBlock = Block(withTypeFromString: "color-red", withView: tempView)//Block(withTypeFromString: id, withView: tempView)
+         
             tempBlocks[gesture.hash] = tempBlock
             
         case .changed:
@@ -424,10 +353,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
                 addBlockToWorkspace(tempBlock)
                 if let repeatBlock = repeatBlockToInsert(block: tempBlock) {
                     repeatBlock.insertBlock(tempBlock)
-                    blockDropSoundPlayer?.play()
                 } else if let attachBlock = blockAttachable(to: tempBlock) {
                     attachBlock.attachBlock(tempBlock)
-                    blockDropSoundPlayer?.play()
                 }
             }
             
@@ -435,19 +362,19 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         }
     }
     
-    @objc func handleTapBlock(_ gesture: UITapGestureRecognizer){
-        guard let view = gesture.view as? UIImageView else {
-            fatalError("Could not find the view for the gesture?!")
-        }
-        
-        if let block = menuBlocks[view] {
-            executeBlock(block)
-        } else if let block = workspaceBlocks[view] {
-            executeBlock(block)
-        } else {
-            fatalError("Could not find block to execute!")
-        }
-    }
+//    @objc func handleTapBlock(_ gesture: UITapGestureRecognizer){
+//        guard let view = gesture.view as? UIImageView else {
+//            fatalError("Could not find the view for the gesture?!")
+//        }
+//
+//        if let block = menuBlocks[view] {
+//            executeBlock(block)
+//        } else if let block = workspaceBlocks[view] {
+//            executeBlock(block)
+//        } else {
+//            fatalError("Could not find block to execute!")
+//        }
+//    }
     
     
     //MARK: Methods for dealing with blocks
@@ -460,8 +387,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         imageView.addGestureRecognizer(gestureRecognizer)
         
         //Add a gesture recognizer so that you can tap a block to execute
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapBlock(_:)))
-        imageView.addGestureRecognizer(tapRecognizer)
+//        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapBlock(_:)))
+//        imageView.addGestureRecognizer(tapRecognizer)
         
         menuBlocks[imageView] = Block(withTypeFromString: imageView.restorationIdentifier ?? "unknown", withView: imageView)
     }
@@ -481,8 +408,8 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         view.addGestureRecognizer(panGestureRecognizer)
         
         //Add a gesture recognizer so that you can tap a block to execute
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapBlock(_:)))
-        view.addGestureRecognizer(tapRecognizer)
+//        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapBlock(_:)))
+//        view.addGestureRecognizer(tapRecognizer)
         
         //All this just to add a shadow
         view.layer.shadowColor = UIColor.lightGray.cgColor
@@ -513,8 +440,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             fatalError("Why doesn't this view have a block attached to delete?")
         }
         
-        trashSoundPlayer?.play()
-        
         deleteBlockChain(startingWith: firstBlock)
     }
     
@@ -532,34 +457,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         workspaceBlocks[block.imageView] = nil
     }
     
-    //TODO: improve this function
-    func executeBlock(_ block: Block){
-        
-        if let finch = finchCurrentlyConnected() {
-            /*serialExecutionQueue.async {
-                block.execute(on: finch)
-            }*/
-            /*executionQueue.addOperation {
-                block.execute(on: finch)
-            }*/
-            
-            let blockOperation = BlockExecution(of: block, on: finch)
-            executionQueue.addOperation(blockOperation)
-        }
-    }
-    
-    //Return the finch connected if there is one, nil otherwise
-    func finchCurrentlyConnected() -> FinchPeripheral? {
-        if topMenuViewController.isConnected {
-            guard let finchID = topMenuViewController.finchID,
-                let finch = BLECentralManager.shared.robotForID(finchID) as? FinchPeripheral else {
-                print("Could not find connected finch!")
-                return nil
-            }
-            return finch
-        }
-        return nil
-    }
     
     func isOverTrash(_ view: UIImageView) -> Bool{
         //print("\(view.center.x) \(trashImage.center.x) \(view.center.y) \(trashImage.center.y)")
@@ -583,11 +480,12 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         if block.type != .controlStart { //controlStart does not snap to anything
             for (_, workspaceBlock) in workspaceBlocks {
                 if workspaceBlock != block {
-                    let minX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious - 10.0 + offset.x
-                    let maxX = workspaceBlock.imageView.center.x + workspaceBlock.offsetToNext + block.offsetToPrevious + block.imageView.frame.width / 2.0 + offset.x
-                    let minY = workspaceBlock.imageView.center.y - block.imageView.frame.height + offset.y
-                    let maxY = workspaceBlock.imageView.center.y + block.imageView.frame.height + offset.y
                 
+                  let minX = workspaceBlock.imageView.center.x - block.imageView.frame.width  + offset.x
+                  let maxX = workspaceBlock.imageView.center.x + block.imageView.frame.width  + offset.x
+                  let minY = workspaceBlock.imageView.center.y + workspaceBlock.offsetToNext + block.offsetToPrevious - 10.0  + offset.y
+                  let maxY = workspaceBlock.imageView.center.y + workspaceBlock.offsetToNext + block.offsetToPrevious + block.imageView.frame.height / 2.0 + offset.y
+                  
                     if block.imageView.center.x > minX && block.imageView.center.x < maxX &&
                         block.imageView.center.y > minY && block.imageView.center.y < maxY{
                         attachBlock = workspaceBlock
@@ -682,11 +580,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             controlTabButtonWidth.constant = 0
             switch tabSelected {
             case .motion:
-                tabsView.bringSubview(toFront: motionTabView)
-            case .sound:
-                tabsView.bringSubview(toFront: soundTabView)
-            case .color:
-                tabsView.bringSubview(toFront: colorTabView)
+               tabsView.bringSubviewToFront(motionTabView)
             case .control:
                 showMotionTab()  //TODO: Test this
             }
@@ -694,11 +588,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             controlTabButtonWidth.constant = 0
             switch tabSelected {
             case .motion:
-                tabsView.bringSubview(toFront: motionL2TabView)
-            case .sound:
-                tabsView.bringSubview(toFront: soundL2TabView)
-            case .color:
-                tabsView.bringSubview(toFront: colorL2TabView)
+               tabsView.bringSubviewToFront(motionL2TabView)
             case .control:
                 showMotionTab()
             }
@@ -706,13 +596,9 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             controlTabButtonWidth.constant = 80
             switch tabSelected {
             case .motion:
-                tabsView.bringSubview(toFront: motionL3TabView)
-            case .sound:
-                tabsView.bringSubview(toFront: soundL3TabView)
-            case .color:
-                tabsView.bringSubview(toFront: colorL3TabView)
+               tabsView.bringSubviewToFront(motionL3TabView)
             case .control:
-                tabsView.bringSubview(toFront: controlL3TabView)
+               tabsView.bringSubviewToFront(controlL3TabView)
             }
         default:
             fatalError("Show tab for unrecognized level.")
@@ -722,8 +608,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
 
 enum Tab {
     case motion
-    case sound
-    case color
     case control
 }
 

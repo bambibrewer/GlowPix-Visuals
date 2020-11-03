@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="landscape">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="landscape" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
-    <customFonts key="customFonts">
-        <array key="Raleway-Regular.ttf">
-            <string>Raleway-Regular</string>
-        </array>
-    </customFonts>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="TopMenuViewController" customModule="FinchApp" customModuleProvider="target">
             <connections>
-                <outlet property="connectToFinchButton" destination="1uI-Xs-j1e" id="QBI-R3-grO"/>
-                <outlet property="connectionStatusLabel" destination="bXq-aS-ESo" id="VLV-Sq-WT2"/>
                 <outlet property="levelButton" destination="hp8-8F-6HR" id="se5-Fn-MA4"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
@@ -30,88 +20,33 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="tAt-65-RYL" userLabel="Left Button Stack">
-                    <rect key="frame" x="20" y="165.5" width="333.5" height="44"/>
+                    <rect key="frame" x="20" y="172.5" width="248" height="30"/>
                     <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="wRo-Ec-R8j">
-                            <rect key="frame" x="0.0" y="0.0" width="111" height="44"/>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="wRo-Ec-R8j">
+                            <rect key="frame" x="0.0" y="0.0" width="124" height="30"/>
                             <state key="normal" title="Blank Work Space"/>
                             <connections>
                                 <action selector="newProgram:" destination="-1" eventType="touchUpInside" id="unu-lZ-OjZ"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hp8-8F-6HR">
-                            <rect key="frame" x="91" y="0.0" width="111.5" height="44"/>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hp8-8F-6HR">
+                            <rect key="frame" x="124" y="0.0" width="124" height="30"/>
                             <state key="normal" title="Level"/>
                             <connections>
                                 <action selector="changeLevel:" destination="-1" eventType="touchUpInside" id="TZO-Md-gsa"/>
                             </connections>
                         </button>
-                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="fAI-UW-20f">
-                            <rect key="frame" x="202.5" y="0.0" width="111" height="44"/>
-                            <subviews>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="1uI-Xs-j1e">
-                                    <rect key="frame" x="0.0" y="0.0" width="111" height="30"/>
-                                    <state key="normal" title="Connect to Finch">
-                                        <color key="titleShadowColor" red="0.92143100499999997" green="0.92145264149999995" blue="0.92144101860000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    </state>
-                                    <connections>
-                                        <action selector="connectToFinch:" destination="-1" eventType="touchUpInside" id="ifq-J2-MLE"/>
-                                    </connections>
-                                </button>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bXq-aS-ESo">
-                                    <rect key="frame" x="0.0" y="30" width="111" height="14"/>
-                                    <fontDescription key="fontDescription" name="Raleway-Regular" family="Raleway" pointSize="12"/>
-                                    <nil key="textColor"/>
-                                    <nil key="highlightedColor"/>
-                                </label>
-                            </subviews>
-                        </stackView>
-                    </subviews>
-                </stackView>
-                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="finch-logo-teal" translatesAutoresizingMaskIntoConstraints="NO" id="YUu-ds-UqN">
-                    <rect key="frame" x="333.5" y="160.5" width="100" height="53"/>
-                    <constraints>
-                        <constraint firstAttribute="width" secondItem="YUu-ds-UqN" secondAttribute="height" multiplier="15:8" id="JJd-UK-ceM"/>
-                        <constraint firstAttribute="width" constant="100" id="Wzg-29-Mxa"/>
-                    </constraints>
-                </imageView>
-                <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="6pC-bx-QYM" userLabel="Right Button Stack">
-                    <rect key="frame" x="333.5" y="172.5" width="333.5" height="30"/>
-                    <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8bQ-x8-8Df">
-                            <rect key="frame" x="0.0" y="0.0" width="167" height="30"/>
-                            <state key="normal" title="Run"/>
-                            <connections>
-                                <action selector="runProgram:" destination="-1" eventType="touchUpInside" id="4Ao-9v-p9U"/>
-                            </connections>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5O5-0G-aC9">
-                            <rect key="frame" x="167" y="0.0" width="166.5" height="30"/>
-                            <state key="normal" title="Stop"/>
-                            <connections>
-                                <action selector="stopAll:" destination="-1" eventType="touchUpInside" id="ur1-m5-gAa"/>
-                            </connections>
-                        </button>
                     </subviews>
                 </stackView>
             </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" red="0.79602157878157542" green="0.92863861844483742" blue="0.98407274484634399" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
             <constraints>
                 <constraint firstItem="tAt-65-RYL" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="98g-Ou-y4o"/>
-                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="6pC-bx-QYM" secondAttribute="trailing" constant="20" id="Igk-FO-aWm"/>
-                <constraint firstItem="6pC-bx-QYM" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="ZWs-2T-2am"/>
-                <constraint firstItem="6pC-bx-QYM" firstAttribute="leading" secondItem="YUu-ds-UqN" secondAttribute="trailing" constant="50" id="a05-nU-0SF"/>
-                <constraint firstItem="YUu-ds-UqN" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="fkx-AI-cax"/>
                 <constraint firstItem="tAt-65-RYL" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="gkx-m3-tw0"/>
-                <constraint firstItem="YUu-ds-UqN" firstAttribute="leading" secondItem="tAt-65-RYL" secondAttribute="trailing" constant="50" id="kmK-N7-imo"/>
                 <constraint firstItem="tAt-65-RYL" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="pfD-7d-fRX"/>
-                <constraint firstItem="YUu-ds-UqN" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="qCI-oe-zhr"/>
             </constraints>
-            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <point key="canvasLocation" x="24.5" y="51.5"/>
         </view>
     </objects>
-    <resources>
-        <image name="finch-logo-teal" width="343" height="163"/>
-    </resources>
 </document>

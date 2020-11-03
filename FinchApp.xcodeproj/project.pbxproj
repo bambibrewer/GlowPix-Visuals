@@ -7,20 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		311E21B8207E588900D24B59 /* HSBColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21B7207E588900D24B59 /* HSBColorPicker.swift */; };
-		311E21BF207E7BA800D24B59 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */; };
-		311E21C12088E56900D24B59 /* BlockExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E21C02088E56800D24B59 /* BlockExecution.swift */; };
 		315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315C307D207A6EB100597549 /* LevelTableViewController.swift */; };
-		31934E0C2063F0B200B999DD /* BBTRobotBLEPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0A2063F0B200B999DD /* BBTRobotBLEPeripheral.swift */; };
-		31934E0D2063F0B200B999DD /* HummingbirdPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0B2063F0B200B999DD /* HummingbirdPeripheral.swift */; };
-		31934E0F2063F1B600B999DD /* BBTRobotState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E0E2063F1B600B999DD /* BBTRobotState.swift */; };
-		31934E112063F1FD00B999DD /* SharedUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E102063F1FD00B999DD /* SharedUtilities.swift */; };
-		31934E132063F2E300B999DD /* BLECentralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E122063F2E300B999DD /* BLECentralManager.swift */; };
-		31934E152063F31800B999DD /* HummingbirdUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E142063F31700B999DD /* HummingbirdUtilities.swift */; };
-		31934E172063F32400B999DD /* FinchPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E162063F32400B999DD /* FinchPeripheral.swift */; };
-		31934E192063F32C00B999DD /* FlutterPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E182063F32C00B999DD /* FlutterPeripheral.swift */; };
-		31934E1B2063F3E000B999DD /* FlutterUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31934E1A2063F3E000B999DD /* FlutterUtilities.swift */; };
-		31934E1D2066EDFA00B999DD /* BluetoothDeviceNames.plist in Resources */ = {isa = PBXBuildFile; fileRef = 31934E1C2066EDFA00B999DD /* BluetoothDeviceNames.plist */; };
 		31A353C620614DED003928E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353C520614DED003928E9 /* AppDelegate.swift */; };
 		31A353C820614DED003928E9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353C720614DED003928E9 /* ViewController.swift */; };
 		31A353CB20614DED003928E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 31A353C920614DED003928E9 /* Main.storyboard */; };
@@ -32,7 +19,6 @@
 		31A353FA2061509D003928E9 /* TopMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353F82061509D003928E9 /* TopMenuViewController.swift */; };
 		31A353FB2061509D003928E9 /* TopMenuViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 31A353F92061509D003928E9 /* TopMenuViewController.xib */; };
 		31A353FD20615E97003928E9 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353FC20615E97003928E9 /* Block.swift */; };
-		31CC1A812061807E00548D12 /* RobotsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CC1A802061807E00548D12 /* RobotsTableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,20 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		311E21B7207E588900D24B59 /* HSBColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HSBColorPicker.swift; sourceTree = "<group>"; };
-		311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
-		311E21C02088E56800D24B59 /* BlockExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockExecution.swift; sourceTree = "<group>"; };
 		315C307D207A6EB100597549 /* LevelTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelTableViewController.swift; sourceTree = "<group>"; };
-		31934E0A2063F0B200B999DD /* BBTRobotBLEPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBTRobotBLEPeripheral.swift; sourceTree = "<group>"; };
-		31934E0B2063F0B200B999DD /* HummingbirdPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HummingbirdPeripheral.swift; sourceTree = "<group>"; };
-		31934E0E2063F1B600B999DD /* BBTRobotState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBTRobotState.swift; sourceTree = "<group>"; };
-		31934E102063F1FD00B999DD /* SharedUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedUtilities.swift; sourceTree = "<group>"; };
-		31934E122063F2E300B999DD /* BLECentralManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLECentralManager.swift; sourceTree = "<group>"; };
-		31934E142063F31700B999DD /* HummingbirdUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HummingbirdUtilities.swift; sourceTree = "<group>"; };
-		31934E162063F32400B999DD /* FinchPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FinchPeripheral.swift; sourceTree = "<group>"; };
-		31934E182063F32C00B999DD /* FlutterPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlutterPeripheral.swift; sourceTree = "<group>"; };
-		31934E1A2063F3E000B999DD /* FlutterUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlutterUtilities.swift; sourceTree = "<group>"; };
-		31934E1C2066EDFA00B999DD /* BluetoothDeviceNames.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = BluetoothDeviceNames.plist; sourceTree = "<group>"; };
 		31A353C220614DED003928E9 /* FinchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31A353C520614DED003928E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		31A353C720614DED003928E9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -84,7 +57,6 @@
 		31A353F82061509D003928E9 /* TopMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopMenuViewController.swift; sourceTree = "<group>"; };
 		31A353F92061509D003928E9 /* TopMenuViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TopMenuViewController.xib; sourceTree = "<group>"; };
 		31A353FC20615E97003928E9 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
-		31CC1A802061807E00548D12 /* RobotsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotsTableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,38 +84,9 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		311E21B9207E735100D24B59 /* Blocks */ = {
-			isa = PBXGroup;
-			children = (
-				31A353FC20615E97003928E9 /* Block.swift */,
-				311E21B7207E588900D24B59 /* HSBColorPicker.swift */,
-				311E21BE207E7BA800D24B59 /* ColorPickerViewController.swift */,
-				311E21C02088E56800D24B59 /* BlockExecution.swift */,
-			);
-			path = Blocks;
-			sourceTree = "<group>";
-		};
-		31934E092063F09F00B999DD /* Robots */ = {
-			isa = PBXGroup;
-			children = (
-				31934E102063F1FD00B999DD /* SharedUtilities.swift */,
-				31934E142063F31700B999DD /* HummingbirdUtilities.swift */,
-				31934E1A2063F3E000B999DD /* FlutterUtilities.swift */,
-				31934E0E2063F1B600B999DD /* BBTRobotState.swift */,
-				31934E122063F2E300B999DD /* BLECentralManager.swift */,
-				31934E0A2063F0B200B999DD /* BBTRobotBLEPeripheral.swift */,
-				31934E0B2063F0B200B999DD /* HummingbirdPeripheral.swift */,
-				31934E162063F32400B999DD /* FinchPeripheral.swift */,
-				31934E182063F32C00B999DD /* FlutterPeripheral.swift */,
-				31934E1C2066EDFA00B999DD /* BluetoothDeviceNames.plist */,
-			);
-			path = Robots;
-			sourceTree = "<group>";
-		};
 		31934E1E2069264000B999DD /* TopMenu */ = {
 			isa = PBXGroup;
 			children = (
-				31CC1A802061807E00548D12 /* RobotsTableViewController.swift */,
 				31A353F82061509D003928E9 /* TopMenuViewController.swift */,
 				315C307D207A6EB100597549 /* LevelTableViewController.swift */,
 				31A353F92061509D003928E9 /* TopMenuViewController.xib */,
@@ -175,8 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				31934E1E2069264000B999DD /* TopMenu */,
-				31934E092063F09F00B999DD /* Robots */,
-				311E21B9207E735100D24B59 /* Blocks */,
+				31A353FC20615E97003928E9 /* Block.swift */,
 				31A353C520614DED003928E9 /* AppDelegate.swift */,
 				31A353C720614DED003928E9 /* ViewController.swift */,
 				31A353C920614DED003928E9 /* Main.storyboard */,
@@ -315,7 +257,6 @@
 			files = (
 				31A353D320614DED003928E9 /* LaunchScreen.storyboard in Resources */,
 				31A353FB2061509D003928E9 /* TopMenuViewController.xib in Resources */,
-				31934E1D2066EDFA00B999DD /* BluetoothDeviceNames.plist in Resources */,
 				31A353D020614DED003928E9 /* Assets.xcassets in Resources */,
 				31A353CB20614DED003928E9 /* Main.storyboard in Resources */,
 			);
@@ -342,25 +283,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				31934E1B2063F3E000B999DD /* FlutterUtilities.swift in Sources */,
-				311E21B8207E588900D24B59 /* HSBColorPicker.swift in Sources */,
-				311E21BF207E7BA800D24B59 /* ColorPickerViewController.swift in Sources */,
-				31934E0D2063F0B200B999DD /* HummingbirdPeripheral.swift in Sources */,
 				31A353C820614DED003928E9 /* ViewController.swift in Sources */,
 				31A353FA2061509D003928E9 /* TopMenuViewController.swift in Sources */,
 				31A353FD20615E97003928E9 /* Block.swift in Sources */,
-				31934E172063F32400B999DD /* FinchPeripheral.swift in Sources */,
-				31934E0C2063F0B200B999DD /* BBTRobotBLEPeripheral.swift in Sources */,
-				311E21C12088E56900D24B59 /* BlockExecution.swift in Sources */,
-				31934E192063F32C00B999DD /* FlutterPeripheral.swift in Sources */,
 				315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */,
-				31CC1A812061807E00548D12 /* RobotsTableViewController.swift in Sources */,
-				31934E132063F2E300B999DD /* BLECentralManager.swift in Sources */,
-				31934E0F2063F1B600B999DD /* BBTRobotState.swift in Sources */,
 				31A353C620614DED003928E9 /* AppDelegate.swift in Sources */,
 				31A353CE20614DED003928E9 /* FinchApp.xcdatamodeld in Sources */,
-				31934E112063F1FD00B999DD /* SharedUtilities.swift in Sources */,
-				31934E152063F31800B999DD /* HummingbirdUtilities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

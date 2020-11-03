@@ -11,44 +11,17 @@ import CoreBluetooth
 
 protocol TopMenuViewControllerDelegate {
     func didPressNewProgramButton()
-    func didPressRunProgramButton()
-    func didPressStopAll()
     func didChangeLevel(to newLevel: Int)
 }
 
-class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDelegate, RobotTableViewControllerDelegate, LevelTableViewControllerDelegate, BLECentralManagerDelegate {
+class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDelegate, LevelTableViewControllerDelegate {
     
-    @IBOutlet weak var connectToFinchButton: UIButton!
-    @IBOutlet weak var connectionStatusLabel: UILabel!
     @IBOutlet weak var levelButton: UIButton!
     
     var delegate: TopMenuViewControllerDelegate?
     
-    //let centralQueue = DispatchQueue(label: "ble", attributes: [])
-    //var centralManager = CBCentralManager()
-    
-    //Selected Robot
-    //var finch: FinchPeripheral?
-    var finchName: String?
-    var finchID: String?
-    var isConnected: Bool = false
     var currentLevel: Int = 1
-    
-    var foundRobots: [(robot:CBPeripheral,ss:NSNumber)] = []
-    var header = "Choose your Finch"
-    var robotListVC: RobotsTableViewController?
-    
-    //TODO: put global variables somewhere
-    //BLE adapter
-    let deviceUUID = CBUUID(string: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
-    //UART Service
-    let SERVICE_UUID = CBUUID(string: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
-    //sending
-    let TX_UUID = CBUUID(string: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
-    //receiving
-    let RX_UUID = CBUUID(string: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
-    let RX_CONFIG_UUID = CBUUID(string: "00002902-0000-1000-8000-00805f9b34fb")
-    
+      
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -56,14 +29,6 @@ class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDe
             view.backgroundColor = UIColor(patternImage: backgroundImage)
         }
 
-        self.connectToFinchButton.setTitle("Connect to Finch", for: .normal)
-        connectionStatusLabel.text = "(not connected)"
-        
-        //centralManager = CBCentralManager(delegate: self, queue: centralQueue)
-        
-        print("Scanning? \(BLECentralManager.shared.scanState)")
-        BLECentralManager.shared.delegate = self
-        
         levelButton.setTitle("Level \(currentLevel)", for: .normal)
     }
     
@@ -79,54 +44,11 @@ class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDe
     
     // MARK: IBActions
     
-    @IBAction func connectToFinch(_ sender: UIButton) {
-        let type = BBTRobotType.Finch
-        let typeStr = "Finch"
-        BLECentralManager.shared.startScan(serviceUUIDs: [type.scanningUUID], updateDiscovered: { (peripherals) in
-            //let altName = "Fetching name..."
-            //let darray = peripherals.map { (peripheral) in
-            //    ["id": peripheral.identifier.uuidString,
-            //     "name": BBTgetDeviceNameForGAPName(peripheral.name ?? altName)]
-            //}
-            print("In the startscan callback")
-        BLECentralManager.shared.delegate?.updateDiscoveredRobotList()
-        }, scanEnded: {
-            BLECentralManager.shared.delegate?.scanHasStopped(typeStr: typeStr)
-        })
-        
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        
-        if let robotListVC = storyboard.instantiateViewController(withIdentifier: "robotList") as? RobotsTableViewController {
-            
-            robotListVC.modalPresentationStyle = .popover
-            
-            //anchor to a bar button item. Anything else we can anchor it to?
-            //robotListVC.popoverPresentationController?.barButtonItem =
-            
-            robotListVC.popoverPresentationController?.permittedArrowDirections = .any
-            robotListVC.popoverPresentationController?.delegate = self
-            robotListVC.popoverPresentationController?.sourceView = sender
-            robotListVC.popoverPresentationController?.sourceRect = sender.bounds
-            
-            robotListVC.delegate = self
-            robotListVC.header = self.header
-            robotListVC.foundRobots = self.foundRobots
-            self.robotListVC = robotListVC
-            
-            self.present(robotListVC, animated: true)
-        }
-        
-    }
+   
     @IBAction func newProgram(_ sender: Any) {
         delegate?.didPressNewProgramButton()
     }
-    @IBAction func runProgram(_ sender: Any) {
-        delegate?.didPressRunProgramButton()
-    }
-    @IBAction func stopAll(_ sender: Any) {
-        delegate?.didPressStopAll()
-    }
+    
     @IBAction func changeLevel(_ sender: UIButton) {
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -165,16 +87,6 @@ class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDe
         return true
     }
     
-    //MARK: RobotTableViewControllerDelegate methods
-    func connectToRobot(_ robot: CBPeripheral) {
-        //centralManager.connect(robot, options: nil)
-        finchName = BBTgetDeviceNameForGAPName(robot.name ?? "Fetching name...")
-        finchID = robot.identifier.uuidString
-        
-        
-        let status = BLECentralManager.shared.connectToRobot(byID: robot.identifier.uuidString, ofType: .Finch)
-        print("Connect to robot by ID returned: \(status)")
-    }
     
     //MARK: LevelTableViewControllerDelegate methods
     func selectLevel(_ level: Int) {
@@ -184,60 +96,6 @@ class TopMenuViewController: UIViewController, UIPopoverPresentationControllerDe
     }
     
     
-    //MARK: BLECentralManagerDelegate methods
-    
-    func robotUpdateStatus(id: String, connected: Bool) {
-        
-        if id != finchID {
-            print("Updating status for another robot.")
-            return
-        }
-        
-        guard let finchName = finchName else {
-            print("updating status before trying to connect?")
-            return
-        }
-        
-        isConnected = connected
-        
-        performUIUpdatesOnMain {
-            if connected {
-                self.connectionStatusLabel.text = finchName
-                self.connectToFinchButton.setTitle("Connected!", for: .normal)
-                self.showToast(message: "You are now connected to \(finchName).")
-                //self.finch = BLECentralManager.shared.robotForID(id) as? FinchPeripheral
-            } else {
-                self.connectionStatusLabel.text = "Disconnected from \(finchName)"
-                self.showToast(message: "You have been disconnected from \(finchName)")
-            }
-        }
-    }
-    
-    func robotFirmwareIncompatible(id: String, firmware: String) {
-        performUIUpdatesOnMain {
-            self.connectionStatusLabel.text = "(not connected)"
-            self.connectToFinchButton.setTitle("Connect to Finch", for: .normal)
-            self.showToast(message: "Firmware \(firmware) of \(id) incompatible.")
-        }
-    }
-    
-    func robotFirmwareStatus(id: String, status: String) {
-        //TODO: what?
-    }
-    
-    func updateDiscoveredRobotList() {
-        foundRobots = BLECentralManager.shared.displayDevices.sorted(by: {$0.ss.compare( $1.ss ) == .orderedDescending})
-        if robotListVC != nil {
-            //must make all ui updates on main thread
-            robotListVC?.foundRobots = foundRobots
-            performUIUpdatesOnMain { self.robotListVC?.tableView.reloadData() }
-        }
-        print("updating discovered robot list")
-    }
-    
-    func scanHasStopped(typeStr: String) {
-        //TODO: What?
-    }
     
 
     //MARK: Other

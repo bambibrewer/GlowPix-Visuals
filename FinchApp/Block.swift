@@ -9,13 +9,22 @@
 import Foundation
 import UIKit
 
-class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewControllerDelegate {
+class Block: NSObject, UIPopoverPresentationControllerDelegate {
     
     let executionDuration: UInt32 //The amount of time the block will sleep during execution
     
     let type: BlockType
     let group: BlockGroup
     let imageView: UIImageView
+   
+   let blockHeight:CGFloat = 80
+   let originalBlockWidth: CGFloat = 261.1
+//   var originalBlockWidth: CGFloat {
+//      get {
+//         let originalBlockRatio = 346.0/104.0
+//         return CGFloat(originalBlockRatio)*blockHeight
+//      }
+//   }
     var offsetToNext: CGFloat //The distance along the x axis to place the next block.
     var offsetToPrevious: CGFloat //The distance along the x axis to place the previous block
     let offsetY: CGFloat //The offset on the y axis for blocks that have a text field making them taller
@@ -37,19 +46,15 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         
         type = BlockType.getType(fromString: t)
         imageView = i
+      print(imageView.frame)
+      imageView.frame = CGRect(x: imageView.frame.origin.x,y: imageView.frame.origin.y, width: self.originalBlockWidth, height: self.blockHeight)
+      print(imageView.frame)
         originalWidth = i.frame.width
         currentWidth = i.frame.width
         
         //Set how long the block will be executed for
-        switch type{
-        case .controlStart, .controlRepeat, .controlWait,
-             .colorWheelL3, .colorOffL3, .soundL3: executionDuration = 0
-        case .moveForwardL1, .moveBackwardL1, .turnLeftL1, .turnRightL1,
-             .colorRed, .colorYellow, .colorGreen, .colorCyan, .colorBlue,
-             .colorMagenta, .colorOff, .soundL1: executionDuration = 1000000 //one second
-        case .moveForwardL2, .moveBackwardL2, .turnLeftL2, .turnRightL2,
-             .moveStopL2, .colorOffL2, .colorWheelL2, .soundL2: executionDuration = 500000
-        }
+      
+      executionDuration = 1000000
         
         //Set the block's offsets so that other block link up properly
         switch type {
@@ -62,13 +67,13 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
             offsetToPrevious = 73.0
             offsetY = -2.0
         case .moveForwardL2, .moveBackwardL2, .turnRightL2, .turnLeftL2,
-             .soundL2, .soundL3, .controlWait:
+             .controlWait:
             offsetToNext = 32.0
             offsetToPrevious = 32.0
             offsetY = 4.0
         default:
-            offsetToNext = 32.0
-            offsetToPrevious = 32.0
+         offsetToNext = 0.4*blockHeight
+         offsetToPrevious = 0.4*blockHeight
             offsetY = 0.0
         }
         
@@ -76,13 +81,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         switch type {
         case .controlStart, .controlRepeat, .controlWait:
             group = .control
-        case .colorRed, .colorYellow, .colorGreen, .colorCyan, .colorBlue,
-             .colorMagenta, .colorOff, .colorWheelL2, .colorOffL2,
-             .colorWheelL3, .colorOffL3:
-            group = .color
-        case .soundL1, .soundL2, .soundL3:
-            group = .sound
-        case .moveForwardL1, .moveForwardL2, .moveBackwardL1, .moveBackwardL2,
+        case .colorRed, .colorYellow, .moveForwardL1, .moveForwardL2, .moveBackwardL1, .moveBackwardL2,
              .turnRightL1, .turnRightL2, .turnLeftL1, .turnLeftL2, .moveStopL2:
             group = .motion
         }
@@ -90,7 +89,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         //Setup the input field for blocks that need it
         switch type {
         case .controlRepeat, .controlWait, .moveForwardL2, .moveBackwardL2,
-             .turnLeftL2, .turnRightL2, .soundL2, .soundL3:
+             .turnLeftL2, .turnRightL2:
             var origin = CGPoint(x: 19.0, y: 57.0)
             if type == .controlRepeat {
                 origin = CGPoint(x: 106.0, y: 68.0)
@@ -105,78 +104,15 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
         }
         
         super.init()
-        
-        //For level 2 or 3 color block, need a button to pick the color
-        if type == .colorWheelL2 || type == .colorWheelL3 {
-            let buttonOrigin = CGPoint(x: 20.0, y: 46.0)
-            let buttonSize = CGSize(width: 35.0, height: 35.0)
-            colorPickerButton = UIButton(frame: CGRect(origin: buttonOrigin, size: buttonSize))
-            colorPickerButton?.setImage(UIImage.init(named: "Eight-colour-wheel-2D"), for: .normal)
-            colorPickerButton?.addTarget(self, action: #selector(pickColor(_:)), for: .touchUpInside)
-            //because we want to keep the color wheel image small, add some space to the button
-            //to make it easier to press
-            colorPickerButton?.contentEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-            imageView.addSubview(colorPickerButton!)
-            
-            let bulbOrigin = CGPoint(x: 20.0, y: 9.0)
-            let bulbSize = CGSize(width: 35.0, height: 39.0)
-            colorBulbImage = UIImageView(frame: CGRect(origin: bulbOrigin, size: bulbSize))
-            let bulb = UIImage(named: "bulb-icon")?.withRenderingMode(.alwaysTemplate)
-            colorBulbImage?.image = bulb
-            colorBulbImage?.tintColor = .white
-            imageView.addSubview(colorBulbImage!)
-        }
     }
     
-    //MARK: Color picker methods
     
-    @objc func pickColor(_ sender: UIButton) {
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let colorPickerVC = storyboard.instantiateViewController(withIdentifier: "colorPicker") as? ColorPickerViewController else {
-            fatalError("Could not instantiate color picker view controller.")
-        }
-        
-        colorPickerVC.delegate = self
-        colorPickerVC.modalPresentationStyle = .popover
-        colorPickerVC.popoverPresentationController?.delegate = self //TODO: need this?
-        colorPickerVC.popoverPresentationController?.sourceView = sender
-        colorPickerVC.popoverPresentationController?.sourceRect = sender.bounds
-
-        let mainViewController = UIApplication.shared.keyWindow?.rootViewController
-        mainViewController?.present(colorPickerVC, animated: true, completion: nil)
-    }
-    
-    func didPickColor(_ color: UIColor) {
-        print("did pick color")
-        self.colorBulbImage?.tintColor = color
-    }
-    
-    func getIntenities() -> BBTTriLED {
-        guard let color = colorBulbImage?.tintColor else {
-            fatalError("Could not get color from bulb icon")
-        }
-        var fRed : CGFloat = 0
-        var fGreen : CGFloat = 0
-        var fBlue : CGFloat = 0
-        var fAlpha: CGFloat = 0
-        if color.getRed(&fRed, green: &fGreen, blue: &fBlue, alpha: &fAlpha) {
-            let iRed = UInt8(fRed * 255.0)
-            let iGreen = UInt8(fGreen * 255.0)
-            let iBlue = UInt8(fBlue * 255.0)
-            //let iAlpha = UInt8(fAlpha * 255.0)
-            
-            return BBTTriLED.init(iRed, iGreen, iBlue)
-        } else {
-            fatalError("Failed to get the intensities from the bulb icon")
-        }
-    }
     
     //MARK: Other
     
     func centerPosition(whenConnectingTo block: Block ) -> CGPoint {
-        let X = block.imageView.center.x + block.offsetToNext + self.offsetToPrevious
-        let Y = block.imageView.center.y - block.offsetY + self.offsetY
+      let X = block.imageView.center.x + self.offsetY//block.offsetToNext + self.offsetToPrevious
+      let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious//- block.offsetY + self.offsetY
         
         return CGPoint(x: X, y: Y)
     }
@@ -298,8 +234,6 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate, ColorPickerViewC
 enum BlockGroup {
     case control
     case motion
-    case sound
-    case color
 }
 
 enum BlockType {
@@ -320,22 +254,10 @@ enum BlockType {
     case turnRightL2
     //Motion Level 3 - still waiting on graphics
     //Color Level 1
-    case colorBlue
-    case colorCyan
-    case colorGreen
-    case colorMagenta
-    case colorOff
+  
     case colorRed
     case colorYellow
-    //Color Level 2 and 3
-    case colorWheelL2
-    case colorOffL2
-    case colorWheelL3
-    case colorOffL3
-    //Sound all Levels
-    case soundL1
-    case soundL2
-    case soundL3
+  
     
     
     static func getType(fromString string: String) -> BlockType{
@@ -369,37 +291,12 @@ enum BlockType {
             return .moveStopL2
         //Motion Level 3 - still waiting on graphics
         //Sound All Levels
-        case "sound-L1":
-            return .soundL1
-        case "sound-L2":
-            return .soundL2
-        case "sound-L3":
-            return .soundL3
+      
         //Color Level 1
         case "color-red":
             return .colorRed
         case "color-yellow":
             return .colorYellow
-        case "color-green":
-            return .colorGreen
-        case "color-cyan":
-            return .colorCyan
-        case "color-blue":
-            return .colorBlue
-        case "color-magenta":
-            return .colorMagenta
-        case "color-off":
-            return .colorOff
-        //Color Level 2
-        case "blank-color-L2":
-            return .colorWheelL2
-        case "color-off-L2":
-            return .colorOffL2
-        //Color Level 3
-        case "blank-color-L3":
-            return .colorWheelL3
-        case "color-off-L3":
-            return .colorOffL3
         default:
             fatalError("Unknown block type \(string)!")
         }
