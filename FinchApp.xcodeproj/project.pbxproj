@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315C307D207A6EB100597549 /* LevelTableViewController.swift */; };
 		31A353C620614DED003928E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353C520614DED003928E9 /* AppDelegate.swift */; };
 		31A353C820614DED003928E9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353C720614DED003928E9 /* ViewController.swift */; };
 		31A353CB20614DED003928E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 31A353C920614DED003928E9 /* Main.storyboard */; };
@@ -16,8 +15,6 @@
 		31A353D320614DED003928E9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 31A353D120614DED003928E9 /* LaunchScreen.storyboard */; };
 		31A353DE20614DED003928E9 /* FinchAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353DD20614DED003928E9 /* FinchAppTests.swift */; };
 		31A353E920614DEE003928E9 /* FinchAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353E820614DEE003928E9 /* FinchAppUITests.swift */; };
-		31A353FA2061509D003928E9 /* TopMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353F82061509D003928E9 /* TopMenuViewController.swift */; };
-		31A353FB2061509D003928E9 /* TopMenuViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 31A353F92061509D003928E9 /* TopMenuViewController.xib */; };
 		31A353FD20615E97003928E9 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A353FC20615E97003928E9 /* Block.swift */; };
 /* End PBXBuildFile section */
 
@@ -39,7 +36,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		315C307D207A6EB100597549 /* LevelTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelTableViewController.swift; sourceTree = "<group>"; };
 		31A353C220614DED003928E9 /* FinchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31A353C520614DED003928E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		31A353C720614DED003928E9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -54,8 +50,6 @@
 		31A353E420614DED003928E9 /* FinchAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FinchAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		31A353E820614DEE003928E9 /* FinchAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinchAppUITests.swift; sourceTree = "<group>"; };
 		31A353EA20614DEE003928E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		31A353F82061509D003928E9 /* TopMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopMenuViewController.swift; sourceTree = "<group>"; };
-		31A353F92061509D003928E9 /* TopMenuViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TopMenuViewController.xib; sourceTree = "<group>"; };
 		31A353FC20615E97003928E9 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,16 +78,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		31934E1E2069264000B999DD /* TopMenu */ = {
-			isa = PBXGroup;
-			children = (
-				31A353F82061509D003928E9 /* TopMenuViewController.swift */,
-				315C307D207A6EB100597549 /* LevelTableViewController.swift */,
-				31A353F92061509D003928E9 /* TopMenuViewController.xib */,
-			);
-			path = TopMenu;
-			sourceTree = "<group>";
-		};
 		31A353B920614DED003928E9 = {
 			isa = PBXGroup;
 			children = (
@@ -117,7 +101,6 @@
 		31A353C420614DED003928E9 /* FinchApp */ = {
 			isa = PBXGroup;
 			children = (
-				31934E1E2069264000B999DD /* TopMenu */,
 				31A353FC20615E97003928E9 /* Block.swift */,
 				31A353C520614DED003928E9 /* AppDelegate.swift */,
 				31A353C720614DED003928E9 /* ViewController.swift */,
@@ -256,7 +239,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				31A353D320614DED003928E9 /* LaunchScreen.storyboard in Resources */,
-				31A353FB2061509D003928E9 /* TopMenuViewController.xib in Resources */,
 				31A353D020614DED003928E9 /* Assets.xcassets in Resources */,
 				31A353CB20614DED003928E9 /* Main.storyboard in Resources */,
 			);
@@ -284,9 +266,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				31A353C820614DED003928E9 /* ViewController.swift in Sources */,
-				31A353FA2061509D003928E9 /* TopMenuViewController.swift in Sources */,
 				31A353FD20615E97003928E9 /* Block.swift in Sources */,
-				315C307E207A6EB100597549 /* LevelTableViewController.swift in Sources */,
 				31A353C620614DED003928E9 /* AppDelegate.swift in Sources */,
 				31A353CE20614DED003928E9 /* FinchApp.xcdatamodeld in Sources */,
 			);
