@@ -64,47 +64,35 @@
                                         <rect key="frame" x="0.0" y="0.0" width="667" height="100"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="JcW-SJ-AhA">
-                                                <rect key="frame" x="62" y="30" width="543" height="40"/>
+                                                <rect key="frame" x="215" y="10" width="237" height="80"/>
                                                 <subviews>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="color-red" image="glowpix-block-white" translatesAutoresizingMaskIntoConstraints="NO" id="mxg-jG-9hV">
-                                                        <rect key="frame" x="0.0" y="0.0" width="133" height="40"/>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="additionLevel3" image="glowpix-addition-block" translatesAutoresizingMaskIntoConstraints="NO" id="4wj-02-Ycz">
+                                                        <rect key="frame" x="0.0" y="0.0" width="73.5" height="80"/>
                                                         <constraints>
-                                                            <constraint firstAttribute="width" secondItem="mxg-jG-9hV" secondAttribute="height" multiplier="346:104" id="kIc-5b-aKD"/>
-                                                            <constraint firstAttribute="height" constant="40" id="qhw-JO-A6W"/>
+                                                            <constraint firstAttribute="height" constant="80" id="OMD-uI-uLa"/>
+                                                            <constraint firstAttribute="width" secondItem="4wj-02-Ycz" secondAttribute="height" multiplier="70:76" id="ZYD-iQ-lzY"/>
                                                         </constraints>
                                                     </imageView>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="color-yellow" image="glowpix-addition-block" translatesAutoresizingMaskIntoConstraints="NO" id="fdi-sF-4Ya">
-                                                        <rect key="frame" x="141" y="0.0" width="80" height="40"/>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="subtractionLevel3" image="glowpix-subtraction-block" translatesAutoresizingMaskIntoConstraints="NO" id="uPJ-gV-Shq">
+                                                        <rect key="frame" x="81.5" y="0.0" width="74" height="80"/>
                                                         <constraints>
-                                                            <constraint firstAttribute="width" constant="80" id="je1-Of-vs6"/>
+                                                            <constraint firstAttribute="width" secondItem="uPJ-gV-Shq" secondAttribute="height" multiplier="70:76" id="966-SJ-WgO"/>
+                                                            <constraint firstAttribute="height" constant="80" id="OgM-QW-SWz"/>
                                                         </constraints>
                                                     </imageView>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="move-forward" image="move-forward" translatesAutoresizingMaskIntoConstraints="NO" id="Yz1-fr-ZKN">
-                                                        <rect key="frame" x="229" y="0.0" width="50" height="40"/>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="doubleAdditionLevel3" image="glowpix-double-addition-block" translatesAutoresizingMaskIntoConstraints="NO" id="BBE-6k-qr6">
+                                                        <rect key="frame" x="163.5" y="0.0" width="73.5" height="80"/>
                                                         <constraints>
-                                                            <constraint firstAttribute="width" secondItem="Yz1-fr-ZKN" secondAttribute="height" multiplier="1059:853" id="is3-r1-wOk"/>
-                                                            <constraint firstAttribute="width" constant="80" id="upV-PB-dqN"/>
-                                                        </constraints>
-                                                    </imageView>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="move-backward" image="move-backward" translatesAutoresizingMaskIntoConstraints="NO" id="XN1-dt-jqv">
-                                                        <rect key="frame" x="287" y="0.0" width="80" height="40"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="width" constant="80" id="joq-nB-W3i"/>
-                                                        </constraints>
-                                                    </imageView>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="turn-left" image="turn-left" translatesAutoresizingMaskIntoConstraints="NO" id="f6P-Ap-l1e">
-                                                        <rect key="frame" x="375" y="0.0" width="80" height="40"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="width" constant="80" id="vQo-IJ-dOT"/>
-                                                        </constraints>
-                                                    </imageView>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="turn-right" image="turn-right" translatesAutoresizingMaskIntoConstraints="NO" id="2Ux-OA-tmU">
-                                                        <rect key="frame" x="463" y="0.0" width="80" height="40"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="width" constant="80" id="Xrc-4s-8rd"/>
+                                                            <constraint firstAttribute="width" secondItem="BBE-6k-qr6" secondAttribute="height" multiplier="70:76" id="lJM-kK-9OD"/>
+                                                            <constraint firstAttribute="height" constant="80" id="phn-U0-n7F"/>
                                                         </constraints>
                                                     </imageView>
                                                 </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="4wj-02-Ycz" firstAttribute="width" secondItem="4wj-02-Ycz" secondAttribute="height" multiplier="70:76" id="9Et-WQ-sa1"/>
+                                                    <constraint firstItem="BBE-6k-qr6" firstAttribute="width" secondItem="BBE-6k-qr6" secondAttribute="height" multiplier="70:76" id="VhS-eg-dQ0"/>
+                                                    <constraint firstItem="uPJ-gV-Shq" firstAttribute="width" secondItem="uPJ-gV-Shq" secondAttribute="height" multiplier="70:76" id="ciR-uw-FJh"/>
+                                                </constraints>
                                             </stackView>
                                         </subviews>
                                         <color key="backgroundColor" red="0.92143100499999997" green="0.92145264149999995" blue="0.92144101860000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -239,30 +227,27 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="additionBlock" destination="4wj-02-Ycz" id="Pgp-on-Q76"/>
                         <outlet property="canvas" destination="NPx-If-7ij" id="Coz-dx-9mE"/>
-                        <outlet property="colorRedStatic" destination="mxg-jG-9hV" id="KDY-Cd-pGz"/>
-                        <outlet property="colorYellowStatic" destination="fdi-sF-4Ya" id="ozZ-13-rJ4"/>
                         <outlet property="controlL3TabView" destination="7sS-3p-yYs" id="c3k-v2-Bvv"/>
                         <outlet property="controlRepeatStatic" destination="jpt-Ty-PA5" id="Msc-nY-RBc"/>
                         <outlet property="controlStartStatic" destination="LIY-wM-EXy" id="M29-cZ-dpn"/>
                         <outlet property="controlTabButtonHeight" destination="CXt-WQ-ugt" id="P6e-19-kUT"/>
                         <outlet property="controlTabButtonWidth" destination="d4P-QC-wHq" id="w3i-X4-4jJ"/>
                         <outlet property="controlWaitStatic" destination="TU7-EG-DbH" id="jhb-Pm-lEH"/>
+                        <outlet property="doubleAdditionBlock" destination="BBE-6k-qr6" id="h6m-10-BpW"/>
                         <outlet property="motionL2TabView" destination="lWW-Rc-uNz" id="p5u-Zb-U9t"/>
                         <outlet property="motionL3TabView" destination="jLm-08-cjv" id="Prl-a2-EBx"/>
                         <outlet property="motionTabButtonHeight" destination="dxx-jf-nFR" id="BUb-GJ-BB2"/>
                         <outlet property="motionTabView" destination="hez-H0-PRa" id="r7k-lg-8WG"/>
                         <outlet property="moveBackwardL2Static" destination="UzO-oa-En4" id="Xgy-Xl-G99"/>
-                        <outlet property="moveBackwardStatic" destination="XN1-dt-jqv" id="oYH-K5-zg3"/>
                         <outlet property="moveForwardL2Static" destination="q24-6X-VnE" id="6br-Rg-mqP"/>
-                        <outlet property="moveForwardStatic" destination="Yz1-fr-ZKN" id="6dv-nU-Iqm"/>
                         <outlet property="moveStopL2Static" destination="hhq-bb-0np" id="GxF-mp-68Q"/>
+                        <outlet property="subtractionBlock" destination="uPJ-gV-Shq" id="pgB-Rn-J5h"/>
                         <outlet property="tabsView" destination="C1X-AD-dZ9" id="M2o-nE-7bb"/>
                         <outlet property="trashImage" destination="4dj-IX-Jl5" id="1UD-pH-PeO"/>
                         <outlet property="turnLeftL2Static" destination="KMc-oa-him" id="JNo-Sb-DpB"/>
-                        <outlet property="turnLeftStatic" destination="f6P-Ap-l1e" id="ZBi-dU-67h"/>
                         <outlet property="turnRightL2Static" destination="TYZ-UC-FXy" id="WBM-vU-Zgh"/>
-                        <outlet property="turnRightStatic" destination="2Ux-OA-tmU" id="nXX-Qk-YTv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -311,18 +296,15 @@
     <resources>
         <image name="control-start" width="1200" height="853"/>
         <image name="glowpix-addition-block" width="70" height="76"/>
-        <image name="glowpix-block-white" width="346" height="106"/>
-        <image name="move-backward" width="1059" height="853"/>
+        <image name="glowpix-double-addition-block" width="70" height="76"/>
+        <image name="glowpix-subtraction-block" width="70" height="76"/>
         <image name="move-backward-L2" width="1059" height="950"/>
-        <image name="move-forward" width="1059" height="853"/>
         <image name="move-forward-L2" width="1059" height="950"/>
         <image name="move-stop" width="1059" height="853"/>
         <image name="repeat-x-times" width="131.5" height="83"/>
         <image name="trash" width="200" height="220"/>
         <image name="trash-highlighted" width="200" height="220"/>
-        <image name="turn-left" width="1059" height="853"/>
         <image name="turn-left-L2" width="1059" height="950"/>
-        <image name="turn-right" width="1059" height="853"/>
         <image name="turn-right-L2" width="1059" height="950"/>
         <image name="wait" width="1059" height="950"/>
     </resources>

@@ -33,23 +33,18 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
     @IBOutlet weak var trashImage: UIImageView!
     
     //Motion Menu Blocks
-    @IBOutlet weak var moveForwardStatic: UIImageView!
-    @IBOutlet weak var moveBackwardStatic: UIImageView!
-    @IBOutlet weak var turnLeftStatic: UIImageView!
-    @IBOutlet weak var turnRightStatic: UIImageView!
+    
     @IBOutlet weak var moveForwardL2Static: UIImageView!
     @IBOutlet weak var moveBackwardL2Static: UIImageView!
     @IBOutlet weak var turnLeftL2Static: UIImageView!
     @IBOutlet weak var turnRightL2Static: UIImageView!
     @IBOutlet weak var moveStopL2Static: UIImageView!
     
-
-    
-    //Color Menu Blocks
-    @IBOutlet weak var colorRedStatic: UIImageView!
-    @IBOutlet weak var colorYellowStatic: UIImageView!
    
-    
+   @IBOutlet var additionBlock: UIImageView!
+   @IBOutlet var subtractionBlock: UIImageView!
+   @IBOutlet var doubleAdditionBlock: UIImageView!
+   
     //Control Menu Blocks
     @IBOutlet weak var controlStartStatic: UIImageView!
     @IBOutlet weak var controlRepeatStatic: UIImageView!
@@ -105,10 +100,7 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         trashImage.isHidden = true
         
         //Setup motion menu blocks
-        setupMenuBlock(moveForwardStatic)
-        setupMenuBlock(moveBackwardStatic)
-        setupMenuBlock(turnLeftStatic)
-        setupMenuBlock(turnRightStatic)
+        
         setupMenuBlock(moveForwardL2Static)
         setupMenuBlock(moveBackwardL2Static)
         setupMenuBlock(turnLeftL2Static)
@@ -117,8 +109,10 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         
         
         //Setup color menu blocks
-        setupMenuBlock(colorRedStatic)
-        setupMenuBlock(colorYellowStatic)
+       
+      setupMenuBlock(additionBlock)
+      setupMenuBlock(subtractionBlock)
+      setupMenuBlock(doubleAdditionBlock)
         
         //Setup control menu blocks
         setupMenuBlock(controlStartStatic)
@@ -169,33 +163,6 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
         }
     }
     
-//    func didPressRunProgramButton() {
-//        print("pressed run program")
-//        //TODO: some sort of message if there is no start block? or no blocks connected?
-//        guard let startBlock = startBlock else {
-//            print ("Cannot run when no start block is shown.")
-//            return
-//        }
-//
-//        executeBlock(startBlock)
-//
-//        if level == 3 {
-//            for (_, block) in workspaceBlocks {
-//                if block.type == .controlStart {
-//                    executeBlock(block)
-//                }
-//            }
-//        }
-//    }
-    
-//    func didPressStopAll() {
-//        print("User pressed 'stop'")
-//        executionQueue.cancelAllOperations() 
-//        if let finch = finchCurrentlyConnected() {
-//            let success = finch.setAllOutputsToOff()
-//            if !success { print("Failed in setting all outputs to off.") }
-//        }
-//    }
     
     func didChangeLevel(to newLevel: Int) {
         print("Changed the level to \(newLevel)")
@@ -308,13 +275,14 @@ class ViewController: UIViewController, TopMenuViewControllerDelegate {
             guard let id = gesture.view?.restorationIdentifier else {
                 fatalError("Could not get id for new block.")
             }
+         print(id)
             
-         let tempView = UIImageView(image: UIImage(named: "glowpix-block-white"))//UIImageView(image: gestureImageView.image)
+         let tempView = UIImageView(image: UIImage(named: "glowpix-block-white")?.resizableImage(withCapInsets: UIEdgeInsets(top: 0, left: 50, bottom: 25, right: 10)))//UIImageView(image: gestureImageView.image)
             //tempView.frame = gestureImageView.frame    // Set frame using block height
             tempView.center = gesture.location(in: self.view)
             self.view.addSubview(tempView)
          print("stashing block")
-            let tempBlock = Block(withTypeFromString: "color-red", withView: tempView)//Block(withTypeFromString: id, withView: tempView)
+            let tempBlock = Block(withTypeFromString: id+"workspace", withView: tempView)
          
             tempBlocks[gesture.hash] = tempBlock
             

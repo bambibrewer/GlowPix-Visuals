@@ -25,13 +25,22 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
 //         return CGFloat(originalBlockRatio)*blockHeight
 //      }
 //   }
-    var offsetToNext: CGFloat //The distance along the x axis to place the next block.
-    var offsetToPrevious: CGFloat //The distance along the x axis to place the previous block
-    let offsetY: CGFloat //The offset on the y axis for blocks that have a text field making them taller
+    var offsetToNext: CGFloat //The distance along the y axis to place the next block.
+    var offsetToPrevious: CGFloat //The distance along the y axis to place the previous block
+    let offsetX: CGFloat //The offset on the x axis for blocks that have a text field making them taller
     
     var nextBlock: Block? //the block to be executed after this one
     var previousBlock: Block? //block before this one on chain
     var inputField: UITextField? //Only on certain blocks
+   
+   // Fields for
+   var firstNumber = UIButton()
+   var operatorLabel: UILabel?
+   var secondNumber = UIButton()
+   var operatorLabel2: UILabel?
+   var thirdNumber: UIButton?
+   var equalsLabel: UILabel?
+   var answer = UIButton()
     
     //Only on level 2 (and 3?) color block
     var colorPickerButton: UIButton?
@@ -46,9 +55,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
         
         type = BlockType.getType(fromString: t)
         imageView = i
-      print(imageView.frame)
       imageView.frame = CGRect(x: imageView.frame.origin.x,y: imageView.frame.origin.y, width: self.originalBlockWidth, height: self.blockHeight)
-      print(imageView.frame)
         originalWidth = i.frame.width
         currentWidth = i.frame.width
         
@@ -61,33 +68,126 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
         case .controlStart:
             offsetToNext = 27.0
             offsetToPrevious = 0.0 //Should never be a previous block for the start block
-            offsetY = 0.0
+            offsetX = 0.0
         case .controlRepeat:
             offsetToNext = 73.0
             offsetToPrevious = 73.0
-            offsetY = -2.0
+            offsetX = -2.0
         case .moveForwardL2, .moveBackwardL2, .turnRightL2, .turnLeftL2,
              .controlWait:
             offsetToNext = 32.0
             offsetToPrevious = 32.0
-            offsetY = 4.0
+            offsetX = 4.0
         default:
          offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.4*blockHeight
-            offsetY = 0.0
+            offsetX = 0.0
         }
         
         //Set the group for the block
         switch type {
         case .controlStart, .controlRepeat, .controlWait:
             group = .control
-        case .colorRed, .colorYellow, .moveForwardL1, .moveForwardL2, .moveBackwardL1, .moveBackwardL2,
-             .turnRightL1, .turnRightL2, .turnLeftL1, .turnLeftL2, .moveStopL2:
+        case .additionLevel3, .additionLevel3workspace, .subtractionLevel3, .doubleAdditionLevel3,  .moveForwardL2,  .moveBackwardL2,
+             .turnRightL2, .turnLeftL2, .moveStopL2:
             group = .motion
         }
         
         //Setup the input field for blocks that need it
         switch type {
+        case .additionLevel3workspace:
+         let stackView = UIStackView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+         stackView.axis = .vertical
+         stackView.distribution = .fill
+         stackView.alignment = .fill
+         stackView.spacing = 0
+         
+         let buttons = [firstNumber, secondNumber, answer]
+         for button in buttons {
+            let heightOfRectangle = 0.804*blockHeight    // The height minus the bump to fit the next rectangle
+            let heightButton = 2*heightOfRectangle/3
+            let widthButton = originalWidth/5
+            var origin = CGPoint(x: originalWidth/5, y: heightOfRectangle/6)
+            let size = CGSize(width: widthButton, height: heightButton)
+            //button = UIButton(frame: CGRect(origin: origin, size: size))
+            button.titleLabel?.font = button.titleLabel?.font.withSize(24)
+            let border = CAShapeLayer()
+            border.frame = button.bounds
+            border.fillColor = UIColor.white.cgColor
+            border.strokeColor = UIColor.gray.cgColor
+            border.lineWidth = 2.5
+            border.path = UIBezierPath(roundedRect: button.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
+            button.layer.addSublayer(border)
+            button.setTitleColor(UIColor.blue, for: .normal)
+
+            button.setTitle("1", for: .normal)
+         }
+         
+         let heightOfRectangle = 0.804*blockHeight    // The height minus the bump to fit the next rectangle
+         let heightButton = 2*heightOfRectangle/3
+         let widthButton = originalWidth/5
+         var origin = CGPoint(x: originalWidth/4, y: heightOfRectangle/6)
+         let size = CGSize(width: widthButton, height: heightButton)
+         firstNumber = UIButton(frame: CGRect(origin: origin, size: size))
+         firstNumber.titleLabel?.font = firstNumber.titleLabel?.font.withSize(24)
+         var border = CAShapeLayer()
+         border.frame = firstNumber.bounds
+         border.fillColor = UIColor.white.cgColor
+         border.strokeColor = UIColor.gray.cgColor
+         border.lineWidth = 2.5
+         border.path = UIBezierPath(roundedRect: firstNumber.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
+         firstNumber.layer.addSublayer(border)
+         firstNumber.setTitleColor(UIColor.blue, for: .normal)
+         
+         origin.x += widthButton
+         operatorLabel = UILabel(frame: CGRect(origin: origin, size: size))
+         operatorLabel?.textColor = UIColor.black
+         operatorLabel?.textAlignment = .center
+         operatorLabel?.text = "+"
+         
+         origin.x += widthButton
+         secondNumber = UIButton(frame: CGRect(origin: origin, size: size))
+         secondNumber.titleLabel?.font = secondNumber.titleLabel?.font.withSize(24)
+         border = CAShapeLayer()
+         border.frame = secondNumber.bounds
+         border.fillColor = UIColor.white.cgColor
+         border.strokeColor = UIColor.gray.cgColor
+         border.lineWidth = 2.5
+         border.path = UIBezierPath(roundedRect: secondNumber.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
+         secondNumber.layer.addSublayer(border)
+         secondNumber.setTitleColor(UIColor.blue, for: .normal)
+         
+         origin.x += widthButton
+         equalsLabel = UILabel(frame: CGRect(origin: origin, size: size))
+         equalsLabel?.textColor = UIColor.black
+         equalsLabel?.textAlignment = .center
+         equalsLabel?.text = "="
+         
+         origin.x += widthButton
+         answer = UIButton(frame: CGRect(origin: origin, size: size))
+         answer.titleLabel?.font = answer.titleLabel?.font.withSize(24)
+         border = CAShapeLayer()
+         border.frame = answer.bounds
+         border.fillColor = UIColor.white.cgColor
+         border.strokeColor = UIColor.gray.cgColor
+         border.lineWidth = 2.5
+         border.path = UIBezierPath(roundedRect: answer.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
+         answer.layer.addSublayer(border)
+         answer.setTitleColor(UIColor.blue, for: .normal)
+
+         firstNumber.setTitle("1", for: .normal)
+         imageView.addSubview(firstNumber)
+         imageView.addSubview(operatorLabel!)
+         imageView.addSubview(secondNumber)
+         imageView.addSubview(equalsLabel!)
+         imageView.addSubview(answer)
+         
+         origin.x += widthButton
+         if origin.x > originalWidth {
+            let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
+            imageView.frame = newFrame
+            print("over")
+         }
         case .controlRepeat, .controlWait, .moveForwardL2, .moveBackwardL2,
              .turnLeftL2, .turnRightL2:
             var origin = CGPoint(x: 19.0, y: 57.0)
@@ -111,14 +211,14 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
     //MARK: Other
     
     func centerPosition(whenConnectingTo block: Block ) -> CGPoint {
-      let X = block.imageView.center.x + self.offsetY//block.offsetToNext + self.offsetToPrevious
+      let X = block.imageView.center.x + self.offsetX//block.offsetToNext + self.offsetToPrevious
       let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious//- block.offsetY + self.offsetY
         
         return CGPoint(x: X, y: Y)
     }
     func centerPosition(whenInsertingInto block: Block ) -> CGPoint {
         let X = block.imageView.frame.origin.x + 34.0 + self.offsetToPrevious
-        let Y = block.imageView.center.y - block.offsetY + self.offsetY
+        let Y = block.imageView.center.y - block.offsetX + self.offsetX
         
         return CGPoint(x: X, y: Y)
     }
@@ -241,11 +341,7 @@ enum BlockType {
     case controlStart
     case controlRepeat
     case controlWait
-    //Motion Level 1
-    case moveBackwardL1
-    case moveForwardL1
-    case turnLeftL1
-    case turnRightL1
+
     //Motion Level 2
     case moveBackwardL2
     case moveForwardL2
@@ -253,10 +349,11 @@ enum BlockType {
     case turnLeftL2
     case turnRightL2
     //Motion Level 3 - still waiting on graphics
-    //Color Level 1
-  
-    case colorRed
-    case colorYellow
+
+   case additionLevel3
+   case additionLevel3workspace
+   case subtractionLevel3
+   case doubleAdditionLevel3
   
     
     
@@ -269,15 +366,7 @@ enum BlockType {
             return .controlRepeat
         case "wait":
             return .controlWait
-        //Motion Level 1
-        case "move-forward":
-            return .moveForwardL1
-        case "move-backward":
-            return .moveBackwardL1
-        case "turn-left":
-            return .turnLeftL1
-        case "turn-right":
-            return .turnRightL1
+        
         //Motion Level 2
         case "move-forward-L2":
             return .moveForwardL2
@@ -292,11 +381,16 @@ enum BlockType {
         //Motion Level 3 - still waiting on graphics
         //Sound All Levels
       
-        //Color Level 1
-        case "color-red":
-            return .colorRed
-        case "color-yellow":
-            return .colorYellow
+        
+        case "additionLevel3":
+         return .additionLevel3
+        case "additionLevel3workspace":
+         return .additionLevel3workspace
+        case "subtractionLevel3":
+         return .subtractionLevel3
+        case "doubleAdditionLevel3":
+         return .doubleAdditionLevel3
+      
         default:
             fatalError("Unknown block type \(string)!")
         }
