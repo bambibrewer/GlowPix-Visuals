@@ -135,10 +135,8 @@ class ViewController: UIViewController {
          
          
          
-         // if the block is dropped back onto the menu, discard
-         // otherwise add to workspace
-         print("menuy \(menuView.frame.origin.y) with view center \(view.center.y)")
-         if menuView.frame.origin.y < view.center.y {
+         // if the block is dropped back onto the menu, discard it
+         if view.frame.origin.x < menuView.frame.maxX - 10 {
             deleteBlockChain(startingWith: view)
             return
          }
@@ -209,7 +207,8 @@ class ViewController: UIViewController {
          
          // if the block is dropped back onto the menu, discard
          // otherwise add to workspace
-         if menuView.frame.origin.y > tempBlock.imageView.frame.origin.y {
+         print("menu \(menuView.frame.maxX) and other \(tempBlock.imageView.frame.origin.x)")
+         if menuView.frame.maxX < tempBlock.imageView.frame.origin.x {
             addBlockToWorkspace(tempBlock)
             if let repeatBlock = repeatBlockToInsert(block: tempBlock) {
                repeatBlock.insertBlock(tempBlock)
@@ -264,11 +263,10 @@ class ViewController: UIViewController {
    }
    
    func addStartBlock() {
-      print("Adding start block")
       //Creat a new start block
       //TODO: improve
-      let startView = UIImageView(image: UIImage(named: "control-start"))
-      startView.frame = CGRect(x: self.view.bounds.midX/4.0, y: 150.0, width: 91.0, height: 64.0)
+      let startView = UIImageView(image: UIImage(named: "glowpix-start"))
+      startView.frame = CGRect(x: self.view.bounds.midX/2.0, y: 150.0, width: 91.0, height: 64.0)
       startBlock = Block(withTypeFromString: "control-start", withView: startView)
       addBlockToWorkspace(startBlock!)
    }
@@ -277,7 +275,6 @@ class ViewController: UIViewController {
       guard let firstBlock = workspaceBlocks[view] else {
          fatalError("Why doesn't this view have a block attached to delete?")
       }
-      
       deleteBlockChain(startingWith: firstBlock)
    }
    
