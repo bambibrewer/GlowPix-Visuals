@@ -63,21 +63,17 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
       
       executionDuration = 1000000
       
+      
       //Set the block's offsets so that other block link up properly
       switch type {
       case .controlStart:
-         offsetToNext = 27.0
+         offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.0 //Should never be a previous block for the start block
          offsetX = 0.0
       case .controlRepeat:
          offsetToNext = 73.0
          offsetToPrevious = 73.0
          offsetX = -2.0
-      case .moveForwardL2, .moveBackwardL2, .turnRightL2, .turnLeftL2,
-           .controlWait:
-         offsetToNext = 32.0
-         offsetToPrevious = 32.0
-         offsetX = 4.0
       default:
          offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.4*blockHeight
@@ -92,6 +88,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
            .turnRightL2, .turnLeftL2, .moveStopL2:
          group = .motion
       }
+      super.init()
       
       //Setup the input field for blocks that need it
       switch type {
@@ -103,25 +100,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
          stackView.spacing = 0
          
          let buttons = [firstNumber, secondNumber, answer]
-         for button in buttons {
-            let heightOfRectangle = 0.804*blockHeight    // The height minus the bump to fit the next rectangle
-            let heightButton = 2*heightOfRectangle/3
-            let widthButton = originalWidth/5
-            var origin = CGPoint(x: originalWidth/5, y: heightOfRectangle/6)
-            let size = CGSize(width: widthButton, height: heightButton)
-            //button = UIButton(frame: CGRect(origin: origin, size: size))
-            button.titleLabel?.font = button.titleLabel?.font.withSize(24)
-            let border = CAShapeLayer()
-            border.frame = button.bounds
-            border.fillColor = UIColor.white.cgColor
-            border.strokeColor = UIColor.gray.cgColor
-            border.lineWidth = 2.5
-            border.path = UIBezierPath(roundedRect: button.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
-            button.layer.addSublayer(border)
-            button.setTitleColor(UIColor.blue, for: .normal)
-            
-            button.setTitle("1", for: .normal)
-         }
+
          
          let heightOfRectangle = 0.804*blockHeight    // The height minus the bump to fit the next rectangle
          let heightButton = 2*heightOfRectangle/3
@@ -132,12 +111,13 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
          firstNumber.titleLabel?.font = firstNumber.titleLabel?.font.withSize(24)
          var border = CAShapeLayer()
          border.frame = firstNumber.bounds
-         border.fillColor = UIColor.white.cgColor
+         border.fillColor = nil
          border.strokeColor = UIColor.gray.cgColor
          border.lineWidth = 2.5
          border.path = UIBezierPath(roundedRect: firstNumber.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
          firstNumber.layer.addSublayer(border)
          firstNumber.setTitleColor(UIColor.blue, for: .normal)
+         firstNumber.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
          
          origin.x += widthButton
          operatorLabel = UILabel(frame: CGRect(origin: origin, size: size))
@@ -150,12 +130,13 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
          secondNumber.titleLabel?.font = secondNumber.titleLabel?.font.withSize(24)
          border = CAShapeLayer()
          border.frame = secondNumber.bounds
-         border.fillColor = UIColor.white.cgColor
+         border.fillColor = nil
          border.strokeColor = UIColor.gray.cgColor
          border.lineWidth = 2.5
          border.path = UIBezierPath(roundedRect: secondNumber.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
          secondNumber.layer.addSublayer(border)
          secondNumber.setTitleColor(UIColor.blue, for: .normal)
+         secondNumber.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
          
          origin.x += widthButton
          equalsLabel = UILabel(frame: CGRect(origin: origin, size: size))
@@ -168,14 +149,17 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
          answer.titleLabel?.font = answer.titleLabel?.font.withSize(24)
          border = CAShapeLayer()
          border.frame = answer.bounds
-         border.fillColor = UIColor.white.cgColor
+         border.fillColor = nil
          border.strokeColor = UIColor.gray.cgColor
          border.lineWidth = 2.5
          border.path = UIBezierPath(roundedRect: answer.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
          answer.layer.addSublayer(border)
          answer.setTitleColor(UIColor.blue, for: .normal)
+         answer.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
          
          firstNumber.setTitle("1", for: .normal)
+         secondNumber.setTitle("2", for: .normal)
+         answer.setTitle("3", for: .normal)
          imageView.addSubview(firstNumber)
          imageView.addSubview(operatorLabel!)
          imageView.addSubview(secondNumber)
@@ -203,19 +187,22 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
       default: ()
       }
       
-      super.init()
+      
    }
    
-   
+   @objc func buttonPressed(_ sender: UIButton) {
+      print("pressed")
+   }
    
    //MARK: Other
    
-   func centerPosition(whenConnectingTo block: Block ) -> CGPoint {
-      let X = block.imageView.center.x + self.offsetX//block.offsetToNext + self.offsetToPrevious
-      let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious//- block.offsetY + self.offsetY
+   func getPosition(whenConnectingTo block: Block ) -> CGPoint {
+      let X = block.imageView.frame.origin.x
+      let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious
       
       return CGPoint(x: X, y: Y)
    }
+   
    func centerPosition(whenInsertingInto block: Block ) -> CGPoint {
       let X = block.imageView.frame.origin.x + 34.0 + self.offsetToPrevious
       let Y = block.imageView.center.y - block.offsetX + self.offsetX
@@ -269,7 +256,9 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
    func positionChainImages(){
       //print("position chain images")
       if let nextBlock = nextBlock {
-         nextBlock.imageView.center = nextBlock.centerPosition(whenConnectingTo: self)
+         let position = nextBlock.getPosition(whenConnectingTo: self)
+         nextBlock.imageView.frame.origin.x = position.x
+         nextBlock.imageView.center.y = position.y
          nextBlock.positionChainImages()
       }
       if let repeater = blockChainToRepeat {

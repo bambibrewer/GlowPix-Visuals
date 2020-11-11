@@ -118,7 +118,7 @@ class ViewController: UIViewController {
             addGhostImage(of: view, at: gestureBlock.centerPosition(whenInsertingInto: repeatBlock), forGesture: gesture.hash)
             gestureBlock.bringToFront()
          } else if let attachableBlock = blockAttachable(to: gestureBlock) {
-            addGhostImage(of: view, at: gestureBlock.centerPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+            addGhostImage(of: view, at: gestureBlock.getPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
             gestureBlock.bringToFront()
          } else {
             removeGhostImage(forGesture: gesture.hash)
@@ -190,7 +190,7 @@ class ViewController: UIViewController {
          if let repeatBlock = repeatBlockToInsert(block: tempBlock) {
             addGhostImage(of: tempBlock.imageView, at: tempBlock.centerPosition(whenInsertingInto: repeatBlock), forGesture: gesture.hash)
          } else if let attachableBlock = blockAttachable(to: tempBlock) {
-            addGhostImage(of: tempBlock.imageView, at: tempBlock.centerPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+            addGhostImage(of: tempBlock.imageView, at: tempBlock.getPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
          } else {
             removeGhostImage(forGesture: gesture.hash)
          }
@@ -382,11 +382,10 @@ class ViewController: UIViewController {
       tmp.tintColor = UIColor.lightGray
       
       tmp.frame = view.frame
-      tmp.center = position
+      tmp.frame.origin.x = position.x
+      tmp.center.y = position.y
       canvas.addSubview(tmp)
       ghostImageViews[hash] = tmp
-      
-      
    }
    
    func removeGhostImage (forGesture hash: Int) {
@@ -395,6 +394,5 @@ class ViewController: UIViewController {
          ghostImageViews[hash] = nil
       }
    }
-   
 }
 
