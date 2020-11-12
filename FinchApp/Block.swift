@@ -109,9 +109,6 @@ class Block: NSObject, KeyPadPopupDelegate {
          stackView.alignment = .fill
          stackView.spacing = 0
          
-         let buttons = [firstNumber, secondNumber, answer]
-         
-         
          let heightOfRectangle = 0.804*blockHeight    // The height minus the bump to fit the next rectangle
          let heightButton = 2*heightOfRectangle/3
          let widthButton = originalWidth/5
@@ -211,7 +208,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       let storyboard = UIStoryboard(name: "KeyPadStoryboard", bundle: nil)
       let popoverContentController = storyboard.instantiateViewController(withIdentifier: "KeyPadViewController") as? KeyPadViewController
       popoverContentController?.modalPresentationStyle = .popover
-      popoverContentController?.preferredContentSize = CGSize(width: 320, height: 400)
+      popoverContentController?.preferredContentSize = CGSize(width: 300, height: 400)
       
       /* Position the keypad popup */
       let buttonFrame = sender.frame
