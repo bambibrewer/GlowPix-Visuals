@@ -13,11 +13,11 @@
         <scene sceneID="iU4-uu-unl">
             <objects>
                 <viewController storyboardIdentifier="KeyPadViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5gS-NZ-Dtq" customClass="KeyPadViewController" customModule="FinchApp" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="RPb-q6-H7M">
+                    <view key="view" contentMode="scaleToFill" ambiguous="YES" id="RPb-q6-H7M">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FeB-i3-Abp" customClass="OwletKeypadView" customModule="FinchApp" customModuleProvider="target">
+                            <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FeB-i3-Abp" customClass="OwletKeypadView" customModule="FinchApp" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="248" width="300" height="400"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
@@ -30,7 +30,6 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="FeB-i3-Abp" firstAttribute="centerY" secondItem="RPb-q6-H7M" secondAttribute="centerY" id="Wdj-2G-6Eb"/>
-                            <constraint firstItem="FeB-i3-Abp" firstAttribute="centerX" secondItem="RPb-q6-H7M" secondAttribute="centerX" id="ZCH-rm-Avx"/>
                             <constraint firstItem="FeB-i3-Abp" firstAttribute="leading" secondItem="D42-g0-0Y1" secondAttribute="leading" id="o1B-Vs-7K4"/>
                             <constraint firstItem="D42-g0-0Y1" firstAttribute="trailing" secondItem="FeB-i3-Abp" secondAttribute="trailing" id="tpI-eK-aeS"/>
                         </constraints>

@@ -1,13 +1,7 @@
-//
-//  KeyPadViewController.swift
-//  FinchApp
-//
-//  Created by Bambi Brewer on 11/12/20.
-//  Copyright © 2020 none. All rights reserved.
-//
-
+// This wraps the Owlet KeyPad in a View Controller so that it can be uses as a popup
 import UIKit
 
+// The class that will be using the popup should be assigned as the delegate, so that it knows the number
 protocol KeyPadPopupDelegate {
    func numberChanged(number: Int?)
 }

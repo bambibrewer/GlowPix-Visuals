@@ -10,14 +10,16 @@ import Foundation
 import UIKit
 
 class Block: NSObject, KeyPadPopupDelegate {
+   
    func numberChanged(number: Int?) {
       if let num = number {
          selectedButton?.setTitle(String(num), for: .normal)
+         selectedButton?.sizeToFit()
+         
+         // If it is a large number, we need to resize all the other stuff
+         print(selectedButton?.frame.size.width)
       }
    }
-   
-   
-   let executionDuration: UInt32 //The amount of time the block will sleep during execution
    
    let type: BlockType
    let group: BlockGroup
@@ -69,11 +71,6 @@ class Block: NSObject, KeyPadPopupDelegate {
       originalWidth = i.frame.width
       currentWidth = i.frame.width
       
-      //Set how long the block will be executed for
-      
-      executionDuration = 1000000
-      
-      
       //Set the block's offsets so that other block link up properly
       switch type {
       case .controlStart:
@@ -115,6 +112,10 @@ class Block: NSObject, KeyPadPopupDelegate {
          var origin = CGPoint(x: originalWidth/4, y: heightOfRectangle/6)
          let size = CGSize(width: widthButton, height: heightButton)
          firstNumber = UIButton(frame: CGRect(origin: origin, size: size))
+//         firstNumber.translatesAutoresizingMaskIntoConstraints = false
+//         firstNumber.widthAnchor.constraint(greaterThanOrEqualToConstant: 20).isActive = true
+//         firstNumber.heightAnchor.constraint(greaterThanOrEqualToConstant: 35).isActive = true
+         //firstNumber.widthAnchor.constraint(greaterThanOrEqualToConstant: widthButton).isActive = true
          firstNumber.titleLabel?.font = firstNumber.titleLabel?.font.withSize(24)
          var border = CAShapeLayer()
          border.frame = firstNumber.bounds
@@ -164,9 +165,6 @@ class Block: NSObject, KeyPadPopupDelegate {
          answer.setTitleColor(UIColor.blue, for: .normal)
          answer.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
          
-         firstNumber.setTitle("1", for: .normal)
-         secondNumber.setTitle("2", for: .normal)
-         answer.setTitle("3", for: .normal)
          imageView.addSubview(firstNumber)
          imageView.addSubview(operatorLabel!)
          imageView.addSubview(secondNumber)
@@ -177,7 +175,6 @@ class Block: NSObject, KeyPadPopupDelegate {
          if origin.x > originalWidth {
             let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
             imageView.frame = newFrame
-            print("over")
          }
       case .controlRepeat, .controlWait, .moveForwardL2, .moveBackwardL2,
            .turnLeftL2, .turnRightL2:
@@ -200,17 +197,16 @@ class Block: NSObject, KeyPadPopupDelegate {
    @objc func buttonPressed(_ sender: UIButton) {
       selectedButton = sender
       
-      // Need a view controller to present the pop-up
+      // Need a view controller to present the pop-up keypad
       let rootViewController = UIApplication.shared.keyWindow?.rootViewController
-      //rootViewController?.present(alertController, animated: true, completion: nil)
       
-      //Configure the presentation controller
+      // Configure the presentation controller
       let storyboard = UIStoryboard(name: "KeyPadStoryboard", bundle: nil)
       let popoverContentController = storyboard.instantiateViewController(withIdentifier: "KeyPadViewController") as? KeyPadViewController
       popoverContentController?.modalPresentationStyle = .popover
       popoverContentController?.preferredContentSize = CGSize(width: 300, height: 400)
       
-      /* Position the keypad popup */
+      // Position the keypad popup
       let buttonFrame = sender.frame
       if let popoverPresentationController = popoverContentController?.popoverPresentationController {
          popoverPresentationController.permittedArrowDirections = [.left, .right]
