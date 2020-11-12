@@ -211,6 +211,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       let storyboard = UIStoryboard(name: "KeyPadStoryboard", bundle: nil)
       let popoverContentController = storyboard.instantiateViewController(withIdentifier: "KeyPadViewController") as? KeyPadViewController
       popoverContentController?.modalPresentationStyle = .popover
+      popoverContentController?.preferredContentSize = CGSize(width: 320, height: 400)
       
       /* Position the keypad popup */
       let buttonFrame = sender.frame
