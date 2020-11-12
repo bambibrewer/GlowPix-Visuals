@@ -7,9 +7,10 @@
 //
 
 import UIKit
-import AVFoundation
 
 class ViewController: UIViewController {
+   //var invisibleButtonForAnchor: UIButton?
+   
    
    //View for the workspace
    @IBOutlet weak var canvas: UIView!
@@ -20,6 +21,7 @@ class ViewController: UIViewController {
    @IBOutlet var subtractionBlock: UIImageView!
    @IBOutlet var doubleAdditionBlock: UIImageView!
    @IBOutlet weak var controlRepeatStatic: UIImageView!
+
    
    //A dictionary to keep track of the ghost images that show up
    //as a block gets close enough to snap onto another
@@ -118,7 +120,7 @@ class ViewController: UIViewController {
             addGhostImage(of: view, at: gestureBlock.centerPosition(whenInsertingInto: repeatBlock), forGesture: gesture.hash)
             gestureBlock.bringToFront()
          } else if let attachableBlock = blockAttachable(to: gestureBlock) {
-            addGhostImage(of: view, at: gestureBlock.getPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+            addGhostImage(of: view, at: gestureBlock.getPositionForGhost(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
             gestureBlock.bringToFront()
          } else {
             removeGhostImage(forGesture: gesture.hash)
@@ -190,7 +192,7 @@ class ViewController: UIViewController {
          if let repeatBlock = repeatBlockToInsert(block: tempBlock) {
             addGhostImage(of: tempBlock.imageView, at: tempBlock.centerPosition(whenInsertingInto: repeatBlock), forGesture: gesture.hash)
          } else if let attachableBlock = blockAttachable(to: tempBlock) {
-            addGhostImage(of: tempBlock.imageView, at: tempBlock.getPosition(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+            addGhostImage(of: tempBlock.imageView, at: tempBlock.getPositionForGhost(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
          } else {
             removeGhostImage(forGesture: gesture.hash)
          }
@@ -220,7 +222,7 @@ class ViewController: UIViewController {
       default: ()
       }
    }
-   
+
    
    
    //MARK: Methods for dealing with blocks
@@ -370,6 +372,7 @@ class ViewController: UIViewController {
       }
    }
    
+
    func addGhostImage (of view: UIImageView, at position: CGPoint, forGesture hash: Int) {
       //if ghostImageViews[hash] == nil { //would like to only create a ghost if there isn't one, but it seems that some attachment zones can overlap. mostly a problem of the repeat block.
       //let tmp = UIImageView(image: view.image)
@@ -387,6 +390,8 @@ class ViewController: UIViewController {
       canvas.addSubview(tmp)
       ghostImageViews[hash] = tmp
    }
+   
+
    
    func removeGhostImage (forGesture hash: Int) {
       if let tmp = ghostImageViews[hash] {

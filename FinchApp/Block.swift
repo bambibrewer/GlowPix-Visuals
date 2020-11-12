@@ -9,7 +9,13 @@
 import Foundation
 import UIKit
 
-class Block: NSObject, UIPopoverPresentationControllerDelegate {
+class Block: NSObject, KeyPadPopupDelegate {
+   func numberChanged(number: Int?) {
+      if let num = number {
+         selectedButton?.setTitle(String(num), for: .normal)
+      }
+   }
+   
    
    let executionDuration: UInt32 //The amount of time the block will sleep during execution
    
@@ -51,7 +57,11 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
    var currentWidth: CGFloat //for stretching
    let originalWidth: CGFloat
    
+   var selectedButton: UIButton? = nil    // Button for which user is currently entering text
+   
    init(withTypeFromString t: String, withView i: UIImageView) {
+      
+      
       
       type = BlockType.getType(fromString: t)
       imageView = i
@@ -100,7 +110,7 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
          stackView.spacing = 0
          
          let buttons = [firstNumber, secondNumber, answer]
-
+         
          
          let heightOfRectangle = 0.804*blockHeight    // The height minus the bump to fit the next rectangle
          let heightButton = 2*heightOfRectangle/3
@@ -191,17 +201,48 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
    }
    
    @objc func buttonPressed(_ sender: UIButton) {
-      print("pressed")
+      selectedButton = sender
+      
+      // Need a view controller to present the pop-up
+      let rootViewController = UIApplication.shared.keyWindow?.rootViewController
+      //rootViewController?.present(alertController, animated: true, completion: nil)
+      
+      //Configure the presentation controller
+      let storyboard = UIStoryboard(name: "KeyPadStoryboard", bundle: nil)
+      let popoverContentController = storyboard.instantiateViewController(withIdentifier: "KeyPadViewController") as? KeyPadViewController
+      popoverContentController?.modalPresentationStyle = .popover
+      
+      /* Position the keypad popup */
+      let buttonFrame = sender.frame
+      if let popoverPresentationController = popoverContentController?.popoverPresentationController {
+         popoverPresentationController.permittedArrowDirections = [.left, .right]
+         popoverPresentationController.sourceView = imageView
+         popoverPresentationController.sourceRect = buttonFrame
+         popoverContentController?.keyPadDelegate = self
+         if let popoverController = popoverContentController {
+            rootViewController?.present(popoverController, animated: true, completion: nil)
+         }
+      }
    }
    
    //MARK: Other
    
-   func getPosition(whenConnectingTo block: Block ) -> CGPoint {
+   func getPositionForGhost(whenConnectingTo block: Block ) -> CGPoint {
       let X = block.imageView.frame.origin.x
       let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious
       
       return CGPoint(x: X, y: Y)
    }
+   
+   func goToPosition(whenConnectingTo block: Block) {
+      let X = block.imageView.frame.origin.x
+      let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious
+      
+      self.imageView.frame.origin.x = X
+      self.imageView.center.y = Y
+   }
+   
+   
    
    func centerPosition(whenInsertingInto block: Block ) -> CGPoint {
       let X = block.imageView.frame.origin.x + 34.0 + self.offsetToPrevious
@@ -254,11 +295,8 @@ class Block: NSObject, UIPopoverPresentationControllerDelegate {
    
    //Put into position all of the images of a chain connecting to this one
    func positionChainImages(){
-      //print("position chain images")
       if let nextBlock = nextBlock {
-         let position = nextBlock.getPosition(whenConnectingTo: self)
-         nextBlock.imageView.frame.origin.x = position.x
-         nextBlock.imageView.center.y = position.y
+         nextBlock.goToPosition(whenConnectingTo: self)
          nextBlock.positionChainImages()
       }
       if let repeater = blockChainToRepeat {
