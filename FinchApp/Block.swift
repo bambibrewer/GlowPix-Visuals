@@ -23,11 +23,54 @@ class Block: NSObject, KeyPadPopupDelegate {
       }
    }
    
+   func setupLabel(text: String, origin: CGPoint) -> UILabel {
+      let label = UILabel(frame: CGRect(origin: origin, size: buttonSize))
+      label.textColor = UIColor.black
+      label.textAlignment = .center
+      label.text = text
+      return label
+   }
+   
+   func setupButton(text: String, origin: CGPoint) -> UIButton {
+      let button = UIButton(frame: CGRect(origin: origin, size: buttonSize))
+      button.titleLabel?.font = button.titleLabel?.font.withSize(24)
+      addBorder(button: button)
+      button.setTitleColor(UIColor.blue, for: .normal)
+      button.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
+      button.setTitle(text, for: .normal)
+      return button
+   }
+   
    func resizeBlock(buttonModified: UIButton)
    {
-      if buttonModified == firstNumber {
-         
+      operatorLabel.removeFromSuperview()
+      var origin = firstNumber.frame.origin
+      origin.x += firstNumber.frame.width
+      operatorLabel = setupLabel(text: mathOperator, origin: origin)
+      
+      secondNumber.removeFromSuperview()
+      origin.x += operatorLabel.frame.width
+      secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+      
+      equalsLabel.removeFromSuperview()
+      origin.x += secondNumber.frame.width
+      equalsLabel = setupLabel(text: "=", origin: origin)
+      
+      answer.removeFromSuperview()
+      origin.x += equalsLabel.frame.width
+      answer = setupButton(text: answer.title(for: .normal) ?? "", origin: origin)
+      
+      imageView.addSubview(operatorLabel)
+      imageView.addSubview(secondNumber)
+      imageView.addSubview(equalsLabel)
+      imageView.addSubview(answer)
+      
+      origin.x += answer.frame.width
+      if origin.x > originalWidth {
+         let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
+         imageView.frame = newFrame
       }
+      
    }
    
    let type: BlockType
@@ -46,6 +89,10 @@ class Block: NSObject, KeyPadPopupDelegate {
       return originalBlockWidth/5
    }
    
+   var buttonSize: CGSize {
+      return CGSize(width: widthOfButton, height: heightOfButton)
+   }
+   
    var offsetToNext: CGFloat //The distance along the y axis to place the next block.
    var offsetToPrevious: CGFloat //The distance along the y axis to place the previous block
    let offsetX: CGFloat //The offset on the x axis for blocks that have a text field making them taller
@@ -55,16 +102,15 @@ class Block: NSObject, KeyPadPopupDelegate {
    var inputField: UITextField? //Only on certain blocks
    
    var mathOperator = "+"
-
-   var stackView = UIStackView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+   
    var firstNumber = UIButton()
-   var operatorLabel: UILabel?
+   var operatorLabel = UILabel()
    var secondNumber = UIButton()
    var operatorLabel2: UILabel?
    var thirdNumber: UIButton?
-   var equalsLabel: UILabel?
+   var equalsLabel = UILabel()
    var answer = UIButton()
-
+   
    //Only for repeat blocks
    var blockChainToRepeat: Block?
    var currentWidth: CGFloat //for stretching
@@ -101,57 +147,16 @@ class Block: NSObject, KeyPadPopupDelegate {
       //Setup the input field for blocks that need it
       switch type {
       case .additionLevel3:
-         //stackView = UIStackView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
-         stackView.axis = .vertical
-         stackView.distribution = .fill
-         stackView.alignment = .fill
-         stackView.spacing = 0
          
          var origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
-         let size = CGSize(width: widthOfButton, height: heightOfButton)
-         firstNumber = UIButton(frame: CGRect(origin: origin, size: size))
+         firstNumber = UIButton(frame: CGRect(origin: origin, size: buttonSize))
          firstNumber.titleLabel?.font = firstNumber.titleLabel?.font.withSize(24)
          firstNumber.setTitleColor(UIColor.blue, for: .normal)
          firstNumber.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
          addBorder(button: firstNumber)
-         
-         origin.x += widthOfButton
-         operatorLabel = UILabel(frame: CGRect(origin: origin, size: size))
-         operatorLabel?.textColor = UIColor.black
-         operatorLabel?.textAlignment = .center
-         operatorLabel?.text = "+"
-         
-         origin.x += widthOfButton
-         secondNumber = UIButton(frame: CGRect(origin: origin, size: size))
-         secondNumber.titleLabel?.font = secondNumber.titleLabel?.font.withSize(24)
-         addBorder(button: secondNumber)
-         secondNumber.setTitleColor(UIColor.blue, for: .normal)
-         secondNumber.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
-         
-         origin.x += widthOfButton
-         equalsLabel = UILabel(frame: CGRect(origin: origin, size: size))
-         equalsLabel?.textColor = UIColor.black
-         equalsLabel?.textAlignment = .center
-         equalsLabel?.text = "="
-         
-         origin.x += widthOfButton
-         answer = UIButton(frame: CGRect(origin: origin, size: size))
-         answer.titleLabel?.font = answer.titleLabel?.font.withSize(24)
-         addBorder(button: answer)
-         answer.setTitleColor(UIColor.blue, for: .normal)
-         answer.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
-         
          imageView.addSubview(firstNumber)
-         imageView.addSubview(operatorLabel!)
-         imageView.addSubview(secondNumber)
-         imageView.addSubview(equalsLabel!)
-         imageView.addSubview(answer)
          
-         origin.x += widthOfButton
-         if origin.x > originalWidth {
-            let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
-            imageView.frame = newFrame
-         }
+         resizeBlock(buttonModified: firstNumber)
       case .controlRepeat:
          var origin = CGPoint(x: 19.0, y: 57.0)
          if type == .controlRepeat {
@@ -187,10 +192,10 @@ class Block: NSObject, KeyPadPopupDelegate {
       border.fillColor = nil
       border.strokeColor = UIColor.gray.cgColor
       border.lineWidth = 2.5
-      border.path = UIBezierPath(roundedRect: firstNumber.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
+      border.path = UIBezierPath(roundedRect: button.bounds, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 6, height: 6)).cgPath
       button.layer.addSublayer(border)
    }
-      
+   
    @objc func buttonPressed(_ sender: UIButton) {
       selectedButton = sender
       
@@ -254,6 +259,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       b.resizeRepeatBlocks()
       positionChainImages()
    }
+   
    //Insert a block into this one (only for repeat blocks)
    func insertBlock (_ b: Block){
       print("insert block")
@@ -355,7 +361,7 @@ enum BlockType {
    case controlStart
    case controlRepeat
    
-  
+   
    case additionLevel3
    case subtractionLevel3
    case doubleAdditionLevel3
@@ -370,8 +376,8 @@ enum BlockType {
       case "repeat-x-times":
          return .controlRepeat
          
-      
-      
+         
+         
       case "additionLevel3":
          return .additionLevel3
       case "subtractionLevel3":
