@@ -134,10 +134,10 @@ class Block: NSObject, KeyPadPopupDelegate {
    func numberChanged(number: Int?) {
       if let num = number, let button = selectedButton {
          button.setTitle(" \(num) ", for: .normal)
-         if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) || (button.frame.width > widthOfButton) {
+         if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) {
             button.sizeToFit()
             addBorder(button: button)
-            // If it is a large number, we need to shift everything else to the right
+            // If we changed the width of the button, we need to shift everything else to the right
             layoutBlock(blockModified: button)
          }
       }
@@ -159,7 +159,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       button.setTitleColor(UIColor.blue, for: .normal)
       button.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
       button.setTitle(text, for: .normal)
-      if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) || (button.frame.width > widthOfButton){
+      if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) {
          button.sizeToFit()
       }
       addBorder(button: button)
@@ -169,9 +169,6 @@ class Block: NSObject, KeyPadPopupDelegate {
    func layoutBlock(blockModified: UIButton)
    {
       var origin = blockModified.frame.origin
-//      let subViews = [operatorLabel, secondNumber, equalsLabel, answer]
-//      let subViewsToChange = subViews.filter{($0.frame.origin.x > origin.x)}
-//      print(subViewsToChange.count)
       
       let isThirdNumber = (thirdNumber != nil) && (operatorLabel2 != nil)
       
@@ -220,8 +217,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       if origin.x > originalWidth {
          let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
          imageView.frame = newFrame
-      }
-      
+      }      
    }
    
    /* This function removes any previous borders */
