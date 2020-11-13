@@ -12,13 +12,14 @@ import UIKit
 class Block: NSObject, KeyPadPopupDelegate {
    
    func numberChanged(number: Int?) {
+      print(number)
       if let num = number, let button = selectedButton {
          button.setTitle(" \(num) ", for: .normal)
          if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) {
             button.sizeToFit()
             addBorder(button: button)
             // If it is a large number, we need to shift everything else to the right
-            resizeBlock(buttonModified: button)
+            layoutBlock(blockModified: button)
          }
       }
    }
@@ -34,37 +35,48 @@ class Block: NSObject, KeyPadPopupDelegate {
    func setupButton(text: String, origin: CGPoint) -> UIButton {
       let button = UIButton(frame: CGRect(origin: origin, size: buttonSize))
       button.titleLabel?.font = button.titleLabel?.font.withSize(24)
-      addBorder(button: button)
       button.setTitleColor(UIColor.blue, for: .normal)
       button.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
       button.setTitle(text, for: .normal)
+      if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) {
+         button.sizeToFit()
+      }
+      addBorder(button: button)
       return button
    }
    
-   func resizeBlock(buttonModified: UIButton)
+   func layoutBlock(blockModified: UIButton)
    {
-      operatorLabel.removeFromSuperview()
-      var origin = firstNumber.frame.origin
-      origin.x += firstNumber.frame.width
-      operatorLabel = setupLabel(text: mathOperator, origin: origin)
+      var origin = blockModified.frame.origin
+      let subViews = [operatorLabel, secondNumber, equalsLabel, answer]
+      let subViewsToChange = subViews.filter{($0.frame.origin.x > origin.x)}
+      print(subViewsToChange.count)
       
-      secondNumber.removeFromSuperview()
-      origin.x += operatorLabel.frame.width
-      secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+      if (blockModified == firstNumber) {
+         operatorLabel.removeFromSuperview()
+         origin.x += firstNumber.frame.width
+         operatorLabel = setupLabel(text: mathOperator, origin: origin)
+         imageView.addSubview(operatorLabel)
+         
+         secondNumber.removeFromSuperview()
+         origin.x += operatorLabel.frame.width
+         secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(secondNumber)
+      }
       
-      equalsLabel.removeFromSuperview()
-      origin.x += secondNumber.frame.width
-      equalsLabel = setupLabel(text: "=", origin: origin)
+      if (blockModified == firstNumber) || (blockModified == secondNumber) {
+         equalsLabel.removeFromSuperview()
+         origin.x += secondNumber.frame.width
+         equalsLabel = setupLabel(text: "=", origin: origin)
+         imageView.addSubview(equalsLabel)
+         
+         answer.removeFromSuperview()
+         origin.x += equalsLabel.frame.width
+         answer = setupButton(text: answer.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(answer)
+      }
       
-      answer.removeFromSuperview()
-      origin.x += equalsLabel.frame.width
-      answer = setupButton(text: answer.title(for: .normal) ?? "", origin: origin)
-      
-      imageView.addSubview(operatorLabel)
-      imageView.addSubview(secondNumber)
-      imageView.addSubview(equalsLabel)
-      imageView.addSubview(answer)
-      
+      // Resize the frame of the block itself
       origin.x += answer.frame.width
       if origin.x > originalWidth {
          let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
@@ -147,16 +159,22 @@ class Block: NSObject, KeyPadPopupDelegate {
       //Setup the input field for blocks that need it
       switch type {
       case .additionLevel3:
-         
-         var origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
-         firstNumber = UIButton(frame: CGRect(origin: origin, size: buttonSize))
-         firstNumber.titleLabel?.font = firstNumber.titleLabel?.font.withSize(24)
-         firstNumber.setTitleColor(UIColor.blue, for: .normal)
-         firstNumber.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
-         addBorder(button: firstNumber)
+         mathOperator = "+"
+         let origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
+         firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(firstNumber)
-         
-         resizeBlock(buttonModified: firstNumber)
+         layoutBlock(blockModified: firstNumber)
+      case .subtractionLevel3:
+         mathOperator = "−"
+         let origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
+         firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(firstNumber)
+         layoutBlock(blockModified: firstNumber)
+      case .doubleAdditionLevel3:
+         mathOperator = "+"
+         thirdNumber = UIButton()
+         operatorLabel2 = UILabel()
+         layoutBlock(blockModified: firstNumber)
       case .controlRepeat:
          var origin = CGPoint(x: 19.0, y: 57.0)
          if type == .controlRepeat {
