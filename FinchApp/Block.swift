@@ -12,10 +12,9 @@ import UIKit
 class Block: NSObject, KeyPadPopupDelegate {
    
    func numberChanged(number: Int?) {
-      print(number)
       if let num = number, let button = selectedButton {
          button.setTitle(" \(num) ", for: .normal)
-         if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) {
+         if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) || (button.frame.width > widthOfButton) {
             button.sizeToFit()
             addBorder(button: button)
             // If it is a large number, we need to shift everything else to the right
@@ -25,7 +24,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    }
    
    func setupLabel(text: String, origin: CGPoint) -> UILabel {
-      let label = UILabel(frame: CGRect(origin: origin, size: buttonSize))
+      let label = UILabel(frame: CGRect(origin: origin, size: labelSize))
       label.textColor = UIColor.black
       label.textAlignment = .center
       label.text = text
@@ -38,7 +37,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       button.setTitleColor(UIColor.blue, for: .normal)
       button.addTarget(self, action: #selector(buttonPressed(_ :)), for: .touchUpInside)
       button.setTitle(text, for: .normal)
-      if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) {
+      if (button.titleLabel?.intrinsicContentSize.width ?? 0 > widthOfButton) || (button.frame.width > widthOfButton){
          button.sizeToFit()
       }
       addBorder(button: button)
@@ -48,9 +47,9 @@ class Block: NSObject, KeyPadPopupDelegate {
    func layoutBlock(blockModified: UIButton)
    {
       var origin = blockModified.frame.origin
-      let subViews = [operatorLabel, secondNumber, equalsLabel, answer]
-      let subViewsToChange = subViews.filter{($0.frame.origin.x > origin.x)}
-      print(subViewsToChange.count)
+//      let subViews = [operatorLabel, secondNumber, equalsLabel, answer]
+//      let subViewsToChange = subViews.filter{($0.frame.origin.x > origin.x)}
+//      print(subViewsToChange.count)
       
       if (blockModified == firstNumber) {
          operatorLabel.removeFromSuperview()
@@ -98,12 +97,19 @@ class Block: NSObject, KeyPadPopupDelegate {
    }
    
    var widthOfButton: CGFloat {
-      return originalBlockWidth/5
+      return originalBlockWidth/4
    }
    
    var buttonSize: CGSize {
       return CGSize(width: widthOfButton, height: heightOfButton)
    }
+   var labelWidth: CGFloat {
+      return originalBlockWidth/8
+   }
+   var labelSize: CGSize {
+      return CGSize(width: labelWidth, height: heightOfButton)
+   }
+
    
    var offsetToNext: CGFloat //The distance along the y axis to place the next block.
    var offsetToPrevious: CGFloat //The distance along the y axis to place the previous block
