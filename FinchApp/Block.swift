@@ -13,6 +13,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    
    let type: BlockType
    let imageView: UIImageView
+   let isNestable: Bool
    
    /* All of these variable control the size of the blocks, and the size of the number buttons and labels within them. */
    let blockHeight:CGFloat = 80
@@ -75,18 +76,21 @@ class Block: NSObject, KeyPadPopupDelegate {
       
       //Set the block's offsets so that other block link up properly
       switch type {
-      case .controlStart:
+      case .startBlock:
          offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.0 //Should never be a previous block for the start block
          offsetX = 0.0
-      case .controlRepeat:
-         offsetToNext = 73.0
-         offsetToPrevious = 73.0
-         offsetX = -2.0
+         isNestable = false
+      case .additionLevel5:
+         offsetToNext = 0.4*blockHeight//73.0
+         offsetToPrevious = 0.4*blockHeight//73.0
+         offsetX = 0.0//-2.0
+      isNestable = true
       default:
          offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.4*blockHeight
          offsetX = 0.0
+         isNestable = false
       }
       
       super.init()
@@ -113,17 +117,19 @@ class Block: NSObject, KeyPadPopupDelegate {
          firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(firstNumber)
          layoutBlock(blockModified: firstNumber)
-      case .controlRepeat:
-         var origin = CGPoint(x: 19.0, y: 57.0)
-         if type == .controlRepeat {
-            origin = CGPoint(x: 106.0, y: 68.0)
-         }
-         let size = CGSize(width: 28.0, height: 15.0)
-         inputField = UITextField(frame: CGRect(origin: origin, size: size))
-         //inputField?.borderStyle = .bezel //for testing it can be useful to be able to see the border
-         inputField?.font = UIFont(descriptor: .preferredFontDescriptor(withTextStyle: .caption1), size: 10.0)
-         inputField?.textAlignment = .center
-         imageView.addSubview(inputField!)
+      case .additionLevel5:
+         mathOperator = "+"
+         var origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
+         firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(firstNumber)
+         
+         origin.x += firstNumber.frame.width
+         operatorLabel = setupLabel(text: mathOperator, origin: origin)
+         imageView.addSubview(operatorLabel)
+         
+         origin.x += operatorLabel.frame.width
+         secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(secondNumber)
       default: ()
       }
       
@@ -309,7 +315,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    //Insert a block into this one (only for repeat blocks)
    func insertBlock (_ b: Block){
       print("insert block")
-      if type != .controlRepeat {
+      if type != .additionLevel5 {
          fatalError("insert block should only be called for repeat blocks")
       }
       
@@ -352,7 +358,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    func resizeRepeatBlocks() {
       print("resize repeat blocks")
       if let previousBlock = previousBlock {
-         if previousBlock.type == .controlRepeat && previousBlock.blockChainToRepeat == self {
+         if previousBlock.type == .additionLevel5 && previousBlock.blockChainToRepeat == self {
             previousBlock.resizeFutureNestedBlocks()
             previousBlock.positionChainImages()
          }
@@ -363,7 +369,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    func resizeFutureNestedBlocks() {
       print("resize")
       //right now, control repeat is the only block to resize
-      if type != .controlRepeat {
+      if type != .additionLevel5 {
          return
       }
       
@@ -404,8 +410,8 @@ class Block: NSObject, KeyPadPopupDelegate {
 
 enum BlockType {
    //Control (Level 3 only except start)
-   case controlStart
-   case controlRepeat
+   case startBlock
+   case additionLevel5
    
    
    case additionLevel3
@@ -417,10 +423,10 @@ enum BlockType {
    static func getType(fromString string: String) -> BlockType{
       switch string {
       //Control (Level 3 only)
-      case "control-start":
-         return .controlStart
-      case "repeat-x-times":
-         return .controlRepeat
+      case "start":
+         return .startBlock
+      case "additionLevel5":
+         return .additionLevel5
          
          
          

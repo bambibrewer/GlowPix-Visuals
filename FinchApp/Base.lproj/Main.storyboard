@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="ipad10_5" orientation="landscape" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -45,7 +45,7 @@
                                                     <constraint firstAttribute="width" constant="80" id="phn-U0-n7F"/>
                                                 </constraints>
                                             </imageView>
-                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" restorationIdentifier="repeat-x-times" image="repeat-x-times" translatesAutoresizingMaskIntoConstraints="NO" id="jpt-Ty-PA5">
+                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" restorationIdentifier="additionLevel5" image="glowpix-addition-nested" translatesAutoresizingMaskIntoConstraints="NO" id="jpt-Ty-PA5">
                                                 <rect key="frame" x="0.0" y="252" width="80" height="582"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="80" id="rkT-BV-J3h"/>
@@ -74,8 +74,8 @@
                     </view>
                     <connections>
                         <outlet property="additionBlock" destination="4wj-02-Ycz" id="Pgp-on-Q76"/>
+                        <outlet property="additionNestedBlock" destination="jpt-Ty-PA5" id="LaB-U7-jWu"/>
                         <outlet property="canvas" destination="NPx-If-7ij" id="Coz-dx-9mE"/>
-                        <outlet property="controlRepeatStatic" destination="jpt-Ty-PA5" id="Msc-nY-RBc"/>
                         <outlet property="doubleAdditionBlock" destination="BBE-6k-qr6" id="h6m-10-BpW"/>
                         <outlet property="menuView" destination="hez-H0-PRa" id="mb5-oa-fda"/>
                         <outlet property="subtractionBlock" destination="uPJ-gV-Shq" id="pgB-Rn-J5h"/>
@@ -88,8 +88,8 @@
     </scenes>
     <resources>
         <image name="glowpix-addition-block" width="70" height="76"/>
+        <image name="glowpix-addition-nested" width="70" height="65"/>
         <image name="glowpix-double-addition-block" width="70" height="76"/>
         <image name="glowpix-subtraction-block" width="70" height="76"/>
-        <image name="repeat-x-times" width="131.5" height="83"/>
     </resources>
 </document>
