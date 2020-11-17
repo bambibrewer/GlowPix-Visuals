@@ -9,7 +9,6 @@
 import UIKit
 
 class ViewController: UIViewController {
-   //var invisibleButtonForAnchor: UIButton?
    
    
    //View for the workspace
@@ -63,13 +62,6 @@ class ViewController: UIViewController {
       addStartBlock()
    }
    
-   override func didReceiveMemoryWarning() {
-      super.didReceiveMemoryWarning()
-      // Dispose of any resources that can be recreated.
-   }
-   
-   
-   
    //MARK: Gesture Recognizer Functions
    
    //Gesture to move the canvas around
@@ -104,7 +96,6 @@ class ViewController: UIViewController {
          guard let view = gesture.view as? UIImageView else {
             fatalError("This gesture should only be attached to an image view")
          }
-         
 
          //Move each block in the chain by the translation amount
          guard let gestureBlock = workspaceBlocks[view] else {
@@ -115,7 +106,7 @@ class ViewController: UIViewController {
          gesture.setTranslation(CGPoint.zero, in: gesture.view)
          
          //Look for a block that could be connected to and produce a ghost image
-         addGhostImageOrNestTarget(gestureBlock, gesture)
+         addGhostImageOrNestTarget(block: gestureBlock, gesture: gesture)
          
       case .ended:
          //Get rid of the ghost image if there is one
@@ -135,20 +126,25 @@ class ViewController: UIViewController {
          guard let gestureBlock = workspaceBlocks[view] else {
             fatalError("No block for panning view!")
          }
-         if (gestureBlock.isNestable) {
-            if let targetButton = targetForNestedBlock(block: gestureBlock) {
-               print("this is where we would do nesting")
-               // where repeatBlockToInsert was
-            }
-         } else if let attachBlock = blockAttachable(to: gestureBlock) {
-            attachBlock.attachBlock(gestureBlock)
-         }
+         nestOrAttach(block: gestureBlock)
          
       default: ()
       }
    }
    
    
+   /* This function nests or attaches a block if that is currently possible. */
+   fileprivate func nestOrAttach(block: Block) {
+      if (block.isNestable) {
+         let (targetBlock, targetButton) = targetForNestedBlock(block: block)
+         if let parentBlock = targetBlock, let buttonToReplace = targetButton {
+            block.parent = parentBlock
+            parentBlock.insertBlock(blockToInsert: block, intoButton: buttonToReplace)
+         }
+      } else if let attachBlock = blockAttachable(to: block) {
+         attachBlock.attachBlock(block)
+      }
+   }
    
    @objc func handleDragBlockFromMenu (_ gesture: UIPanGestureRecognizer){
       
@@ -160,7 +156,6 @@ class ViewController: UIViewController {
          guard let id = gesture.view?.restorationIdentifier else {
             fatalError("Could not get id for new block.")
          }
-         print(id)
          
          var tempView = UIImageView()
          if id == "additionLevel5" {
@@ -168,8 +163,7 @@ class ViewController: UIViewController {
          } else {
             tempView = UIImageView(image: UIImage(named: "glowpix-block-white")?.resizableImage(withCapInsets: UIEdgeInsets(top: 0, left: 50, bottom: 25, right: 10)))
          }
-         //UIImageView(image: gestureImageView.image)
-         //tempView.frame = gestureImageView.frame    // Set frame using block height
+         
          tempView.center = gesture.location(in: self.view)
          self.view.addSubview(tempView)
          print("stashing block")
@@ -187,7 +181,7 @@ class ViewController: UIViewController {
          tempBlock.imageView.center = CGPoint(x: tempBlock.imageView.center.x + translation.x, y: tempBlock.imageView.center.y + translation.y)
          gesture.setTranslation(CGPoint.zero, in: gesture.view)
          
-         addGhostImageOrNestTarget(tempBlock, gesture)
+         addGhostImageOrNestTarget(block: tempBlock, gesture: gesture)
          
       case .ended:
          removeGhostImage(forGesture: gesture.hash)
@@ -201,25 +195,15 @@ class ViewController: UIViewController {
          
          // if the block is dropped back onto the menu, discard
          // otherwise add to workspace
-         print("menu \(menuView.frame.maxX) and other \(tempBlock.imageView.frame.origin.x)")
          if menuView.frame.maxX < tempBlock.imageView.frame.origin.x {
             addBlockToWorkspace(tempBlock)
             
-            if (tempBlock.isNestable) {
-               if let targetButton = targetForNestedBlock(block: tempBlock) {
-                  print("this is where we would do nesting")
-                  // where repeatBlockToInsert was
-               }
-            } else if let attachBlock = blockAttachable(to: tempBlock) {
-               attachBlock.attachBlock(tempBlock)
-            }
+            nestOrAttach(block: tempBlock)
          }
          
       default: ()
       }
    }
-   
-   
    
    //MARK: Methods for dealing with blocks
    
@@ -316,8 +300,8 @@ class ViewController: UIViewController {
       return attachBlock
    }
    
-   // Return any button in a block that could be replaced with a nested block
-   func targetForNestedBlock(block: Block) -> UIButton? {
+   // Return any button in a block that could be replaced with a nested block. We return both the button and the block that it is in, which will be the parent block
+   func targetForNestedBlock(block: Block) -> (Block?, UIButton?) {
       let offset = canvasOffset(of: block)
 
       for (_, workspaceBlock) in workspaceBlocks {
@@ -328,32 +312,15 @@ class ViewController: UIViewController {
                let minY = workspaceBlock.imageView.frame.origin.y + targetButton.frame.minY + offset.y
                let maxY = workspaceBlock.imageView.frame.origin.y + targetButton.frame.maxY + offset.y
                if (block.imageView.frame.minX < maxX && block.imageView.frame.minX > minX && block.imageView.frame.minY < maxY && block.imageView.frame.minY > minY) || (block.imageView.frame.minX < maxX && block.imageView.frame.minX > minX && block.imageView.frame.maxY < maxY && block.imageView.frame.maxY > minY) {
-                  return targetButton
+                  // This is only an acceptable target if there isn't already something nested in that space
+                  if ((targetButton == workspaceBlock.firstNumber) && (workspaceBlock.nestedChild1 == nil)) || ((targetButton == workspaceBlock.secondNumber) && (workspaceBlock.nestedChild2 == nil)) {
+                     return (workspaceBlock, targetButton)
+                  }
                }
             }
          }
       }
-      return nil
-   }
-   
-   //return any repeat block that block can be inserted into
-   func repeatBlockToInsert(block: Block) -> Block? {
-      let offset = canvasOffset(of: block)
-      let minInsertX: CGFloat = 20.0
-      
-      var repeater: Block? = nil
-      for (_, workspaceBlock) in workspaceBlocks {
-         if workspaceBlock.type == .additionLevel5 && workspaceBlock != block{
-            let minX = workspaceBlock.imageView.frame.origin.x + minInsertX + offset.x
-            let maxX = workspaceBlock.imageView.frame.origin.x + minInsertX + block.offsetToPrevious + offset.x
-            let minY = workspaceBlock.imageView.frame.origin.y - block.imageView.frame.height + offset.y
-            let maxY = workspaceBlock.imageView.frame.origin.y + block.imageView.frame.height + offset.y
-            if block.imageView.frame.origin.x < maxX && block.imageView.frame.origin.x > minX && block.imageView.frame.origin.y < maxY && block.imageView.frame.origin.y > minY {
-               repeater = workspaceBlock
-            }
-         }
-      }
-      return repeater
+      return (nil, nil)
    }
    
    //MARK: Other
@@ -387,16 +354,17 @@ class ViewController: UIViewController {
       }
    }
    
-   fileprivate func addGhostImageOrNestTarget(_ tempBlock: Block, _ gesture: UIPanGestureRecognizer) {
+   fileprivate func addGhostImageOrNestTarget(block: Block, gesture: UIPanGestureRecognizer) {
       //Look for a block that could be connected to and produce a ghost image
-      if (tempBlock.isNestable) {
-         if let targetButton = targetForNestedBlock(block: tempBlock) {
-            targetButton.backgroundColor = UIColor.lightGray
+      if (block.isNestable) {
+         let (_, targetButton) = targetForNestedBlock(block: block)
+         if let buttonToReplace = targetButton {
+            buttonToReplace.backgroundColor = UIColor.lightGray
          } else {
             removeShadedButtons()
          }
-      } else if let attachableBlock = blockAttachable(to: tempBlock) {
-         addGhostImage(of: tempBlock.imageView, at: tempBlock.getPositionForGhost(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
+      } else if let attachableBlock = blockAttachable(to: block) {
+         addGhostImage(of: block.imageView, at: block.getPositionForGhost(whenConnectingTo: attachableBlock), forGesture: gesture.hash)
       } else {
          removeGhostImage(forGesture: gesture.hash)
       }

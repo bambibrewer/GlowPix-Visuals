@@ -39,7 +39,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    var labelSize: CGSize {
       return CGSize(width: labelWidth, height: heightOfButton)
    }
-
+   
    
    var offsetToNext: CGFloat //The distance along the y axis to place the next block.
    var offsetToPrevious: CGFloat //The distance along the y axis to place the previous block
@@ -59,7 +59,11 @@ class Block: NSObject, KeyPadPopupDelegate {
    var equalsLabel = UILabel()
    var answer = UIButton()
    
-   //Only for repeat blocks
+   // Only for blocks that nest
+   var nestingOffsetX: CGFloat = -2
+   var parent: Block?
+   var nestedChild1: Block?
+   var nestedChild2: Block?
    var blockChainToRepeat: Block?
    var currentWidth: CGFloat //for stretching
    let originalWidth: CGFloat
@@ -85,7 +89,7 @@ class Block: NSObject, KeyPadPopupDelegate {
          offsetToNext = 0.4*blockHeight//73.0
          offsetToPrevious = 0.4*blockHeight//73.0
          offsetX = 0.0//-2.0
-      isNestable = true
+         isNestable = true
       default:
          offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.4*blockHeight
@@ -102,13 +106,13 @@ class Block: NSObject, KeyPadPopupDelegate {
          let origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
          firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(firstNumber)
-         layoutBlock(blockModified: firstNumber)
+         layoutBlock(buttonModified: firstNumber)
       case .subtractionLevel3:
          mathOperator = "−"
          let origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
          firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(firstNumber)
-         layoutBlock(blockModified: firstNumber)
+         layoutBlock(buttonModified: firstNumber)
       case .doubleAdditionLevel3:
          mathOperator = "+"
          thirdNumber = UIButton()
@@ -116,7 +120,7 @@ class Block: NSObject, KeyPadPopupDelegate {
          let origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
          firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(firstNumber)
-         layoutBlock(blockModified: firstNumber)
+         layoutBlock(buttonModified: firstNumber)
       case .additionLevel5:
          mathOperator = "+"
          var origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
@@ -144,7 +148,7 @@ class Block: NSObject, KeyPadPopupDelegate {
             button.sizeToFit()
             addBorder(button: button)
             // If we changed the width of the button, we need to shift everything else to the right
-            layoutBlock(blockModified: button)
+            layoutBlock(buttonModified: button)
          }
       }
    }
@@ -172,14 +176,13 @@ class Block: NSObject, KeyPadPopupDelegate {
       return button
    }
    
-   func layoutBlock(blockModified: UIButton)
+   func layoutBlock(buttonModified: UIButton)
    {
-      var origin = blockModified.frame.origin
-      
+      var origin = buttonModified.frame.origin
       let isThirdNumber = (thirdNumber != nil) && (operatorLabel2 != nil)
       
       // The first operator and the second number only move if the first number is changing
-      if (blockModified == firstNumber) {
+      if (buttonModified == firstNumber) {
          operatorLabel.removeFromSuperview()
          origin.x += firstNumber.frame.width
          operatorLabel = setupLabel(text: mathOperator, origin: origin)
@@ -192,16 +195,16 @@ class Block: NSObject, KeyPadPopupDelegate {
       }
       
       // If this is the ++ block and the 1st or 2nd number has changed, the second operator and third number need to move
-      if ((blockModified == firstNumber) || (blockModified == secondNumber)) && isThirdNumber {
-            operatorLabel2?.removeFromSuperview()
-            origin.x += secondNumber.frame.width
-            operatorLabel2 = setupLabel(text: mathOperator, origin: origin)
-            imageView.addSubview(operatorLabel2!)
-            
-            thirdNumber?.removeFromSuperview()
-            origin.x += operatorLabel2!.frame.width
-            thirdNumber = setupButton(text: thirdNumber?.title(for: .normal) ?? "", origin: origin)
-            imageView.addSubview(thirdNumber!)
+      if ((buttonModified == firstNumber) || (buttonModified == secondNumber)) && isThirdNumber {
+         operatorLabel2?.removeFromSuperview()
+         origin.x += secondNumber.frame.width
+         operatorLabel2 = setupLabel(text: mathOperator, origin: origin)
+         imageView.addSubview(operatorLabel2!)
+         
+         thirdNumber?.removeFromSuperview()
+         origin.x += operatorLabel2!.frame.width
+         thirdNumber = setupButton(text: thirdNumber?.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(thirdNumber!)
          
       }
       
@@ -225,6 +228,33 @@ class Block: NSObject, KeyPadPopupDelegate {
          imageView.frame = newFrame
       }      
    }
+   
+   func layoutNestedBlock(buttonModified: UIButton)
+   {
+      var origin = buttonModified.frame.origin
+      
+      // The first operator and the second number only move if the first number is changing
+      if (buttonModified == firstNumber) {
+         operatorLabel.removeFromSuperview()
+         origin.x += firstNumber.frame.width
+         operatorLabel = setupLabel(text: mathOperator, origin: origin)
+         imageView.addSubview(operatorLabel)
+         
+         secondNumber.removeFromSuperview()
+         origin.x += operatorLabel.frame.width
+         secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(secondNumber)
+      }
+      
+      // No matther what block was selected, resize the frame of the block itself
+      origin.x += secondNumber.frame.width
+      if origin.x > originalWidth {
+         let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
+         imageView.frame = newFrame
+      }
+   }
+   
+   
    
    /* This function removes any previous borders */
    fileprivate func removePreviousBorders(_ view: UIView) {
@@ -299,7 +329,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       return CGPoint(x: X, y: Y)
    }
    
-   //Attach a block chain to the back of this one
+   //Attach a block chain below this one
    func attachBlock (_ b: Block){
       print("attach block")
       
@@ -308,25 +338,99 @@ class Block: NSObject, KeyPadPopupDelegate {
       }
       nextBlock = b
       b.previousBlock = self
-      b.resizeRepeatBlocks()
-      positionChainImages()
+      //b.resizeRepeatBlocks()
+      //positionChainImages()
    }
    
-   //Insert a block into this one (only for repeat blocks)
-   func insertBlock (_ b: Block){
+   // Insert a block into this one (only for nesting blocks)
+   func insertBlock (blockToInsert: Block, intoButton: UIButton){
       print("insert block")
-      if type != .additionLevel5 {
-         fatalError("insert block should only be called for repeat blocks")
+      if !isNestable {
+         fatalError("insertBlock should only be called for blocks that can nest")
       }
       
-      if let blockChainToRepeat = blockChainToRepeat {
-         b.attachToChain(blockChainToRepeat)
+      var origin = imageView.frame.origin
+      if intoButton == firstNumber {
+         nestedChild1 = blockToInsert
+         origin.x += firstNumber.frame.origin.x + nestingOffsetX
+         nestedChild1?.imageView.frame.origin = origin
+      } else {
+         nestedChild2 = blockToInsert
+         origin.x += secondNumber.frame.origin.x + nestingOffsetX
+         nestedChild2?.imageView.frame.origin = origin
+         //secondNumber.removeFromSuperview()
       }
-      blockChainToRepeat = b
-      b.previousBlock = self
-      b.resizeRepeatBlocks()
-      positionChainImages()
+      
+      // Now I want to redraw, but I want to call the drawing function only on the outermost block
+      var outermostBlock = self
+      while let parentExists = outermostBlock.parent {
+         outermostBlock = parentExists
+      }
+      outermostBlock.drawNestedBlock()
    }
+   
+   func drawNestedBlock() {
+      
+      var origin = CGPoint()//x: nestingOffsetX, y: heightOfRectangle/6)
+      
+      if nestedChild1 != nil {
+         nestedChild1?.drawNestedBlock()
+         origin = CGPoint(x: firstNumber.frame.origin.x + nestingOffsetX, y: heightOfRectangle/6)
+         origin.x += nestedChild1?.imageView.frame.width ?? 0
+         print(origin)
+      } else {
+         origin = firstNumber.frame.origin
+         origin.x += firstNumber.frame.width
+         print(origin)
+      }
+      
+      operatorLabel.removeFromSuperview()
+      operatorLabel = setupLabel(text: mathOperator, origin: origin)
+      imageView.addSubview(operatorLabel)
+      origin.x += operatorLabel.frame.width
+      print(origin.x)
+      
+      if nestedChild2 != nil {
+         nestedChild2?.drawNestedBlock()
+         origin.x += nestedChild2?.imageView.frame.width ?? 0
+      } else {
+         secondNumber.removeFromSuperview()
+         secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(secondNumber)
+         origin.x += secondNumber.frame.width
+      }
+      
+      // Resize the frame of the block itself
+      if origin.x > originalWidth {
+         let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: imageView.frame.height)
+         imageView.frame = newFrame
+      }
+   }
+   
+   //   func layoutNestedBlock(buttonModified: UIButton)
+   //   {
+   //      var origin = buttonModified.frame.origin
+   //
+   //      // The first operator and the second number only move if the first number is changing
+   //      if (buttonModified == firstNumber) {
+   //         operatorLabel.removeFromSuperview()
+   //         origin.x += firstNumber.frame.width
+   //         operatorLabel = setupLabel(text: mathOperator, origin: origin)
+   //         imageView.addSubview(operatorLabel)
+   //
+   //         secondNumber.removeFromSuperview()
+   //         origin.x += operatorLabel.frame.width
+   //         secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+   //         imageView.addSubview(secondNumber)
+   //      }
+   //
+   //      // No matther what block was selected, resize the frame of the block itself
+   //      origin.x += secondNumber.frame.width
+   //      if origin.x > originalWidth {
+   //         let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
+   //         imageView.frame = newFrame
+   //      }
+   //   }
    
    //attach block b to the end of this chain
    func attachToChain (_ b: Block){
@@ -355,46 +459,46 @@ class Block: NSObject, KeyPadPopupDelegate {
    }
    
    //Look above for a repeat block that needs to be resized
-   func resizeRepeatBlocks() {
-      print("resize repeat blocks")
-      if let previousBlock = previousBlock {
-         if previousBlock.type == .additionLevel5 && previousBlock.blockChainToRepeat == self {
-            previousBlock.resizeFutureNestedBlocks()
-            previousBlock.positionChainImages()
-         }
-         previousBlock.resizeRepeatBlocks()
-      }
-   }
+   //   func resizeRepeatBlocks() {
+   //      print("resize repeat blocks")
+   //      if let previousBlock = previousBlock {
+   //         if previousBlock.type == .additionLevel5 && previousBlock.blockChainToRepeat == self {
+   //            previousBlock.resizeFutureNestedBlocks()
+   //            previousBlock.positionChainImages()
+   //         }
+   //         previousBlock.resizeRepeatBlocks()
+   //      }
+   //   }
    
-   func resizeFutureNestedBlocks() {
-      print("resize")
-      //right now, control repeat is the only block to resize
-      if type != .additionLevel5 {
-         return
-      }
-      
-      var width = originalWidth
-      if let chainWidth = blockChainToRepeat?.chainWidth() {
-         width = chainWidth + 99.0
-      }
-      let deltaWidth = width - originalWidth
-      
-      offsetToPrevious = 73.0 + deltaWidth / 2.0
-      offsetToNext = 73.0 + deltaWidth / 2.0
-      inputField?.frame.origin.x = 106.0 + deltaWidth
-      imageView.frame = CGRect(x: imageView.frame.origin.x, y: imageView.frame.origin.y, width: width, height: imageView.frame.height)
-   }
+   //   func resizeFutureNestedBlocks() {
+   //      print("resize")
+   //      //right now, control repeat is the only block to resize
+   //      if type != .additionLevel5 {
+   //         return
+   //      }
+   //
+   //      var width = originalWidth
+   //      if let chainWidth = blockChainToRepeat?.chainWidth() {
+   //         width = chainWidth + 99.0
+   //      }
+   //      let deltaWidth = width - originalWidth
+   //
+   //      offsetToPrevious = 73.0 + deltaWidth / 2.0
+   //      offsetToNext = 73.0 + deltaWidth / 2.0
+   //      inputField?.frame.origin.x = 106.0 + deltaWidth
+   //      imageView.frame = CGRect(x: imageView.frame.origin.x, y: imageView.frame.origin.y, width: width, height: imageView.frame.height)
+   //   }
    
    func detachPreviousBlock(){
       print("detach")
       if previousBlock?.blockChainToRepeat == self {
          previousBlock?.blockChainToRepeat = nil
-         previousBlock?.resizeFutureNestedBlocks()
+         //previousBlock?.resizeFutureNestedBlocks()
          previousBlock?.positionChainImages()
       }else{
          previousBlock?.nextBlock = nil
       }
-      previousBlock?.resizeRepeatBlocks()
+      //previousBlock?.resizeRepeatBlocks()
       previousBlock = nil
    }
    
