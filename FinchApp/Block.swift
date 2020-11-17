@@ -344,7 +344,6 @@ class Block: NSObject, KeyPadPopupDelegate {
    
    // Insert a block into this one (only for nesting blocks)
    func insertBlock (blockToInsert: Block, intoButton: UIButton){
-      print("insert block")
       if !isNestable {
          fatalError("insertBlock should only be called for blocks that can nest")
       }
@@ -354,6 +353,9 @@ class Block: NSObject, KeyPadPopupDelegate {
          nestedChild1 = blockToInsert
          origin.x += firstNumber.frame.origin.x + nestingOffsetX
          nestedChild1?.imageView.frame.origin = origin
+         
+         // If child1 has changed, we also need to reposition the origin of child2, if it exists, any children that it has
+         //nestedChild2?.imageView.frame.origin.x += (nestedChild1?.imageView.frame.width ?? 0) - originalBlockWidth
       } else {
          nestedChild2 = blockToInsert
          origin.x += secondNumber.frame.origin.x + nestingOffsetX
@@ -374,26 +376,31 @@ class Block: NSObject, KeyPadPopupDelegate {
       var origin = CGPoint()//x: nestingOffsetX, y: heightOfRectangle/6)
       
       if nestedChild1 != nil {
+         print("child1")
          nestedChild1?.drawNestedBlock()
          origin = CGPoint(x: firstNumber.frame.origin.x + nestingOffsetX, y: heightOfRectangle/6)
          origin.x += nestedChild1?.imageView.frame.width ?? 0
-         print(origin)
       } else {
+         print("number1")
          origin = firstNumber.frame.origin
          origin.x += firstNumber.frame.width
-         print(origin)
       }
       
       operatorLabel.removeFromSuperview()
       operatorLabel = setupLabel(text: mathOperator, origin: origin)
       imageView.addSubview(operatorLabel)
       origin.x += operatorLabel.frame.width
-      print(origin.x)
       
       if nestedChild2 != nil {
+         print("child2")
+         // When child 1 has moved, we need to adjust the position of child 2
+         print(origin.x)
+         nestedChild2?.imageView.frame.origin.x = imageView.frame.origin.x + origin.x
+         
          nestedChild2?.drawNestedBlock()
          origin.x += nestedChild2?.imageView.frame.width ?? 0
       } else {
+         print("number2")
          secondNumber.removeFromSuperview()
          secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(secondNumber)
