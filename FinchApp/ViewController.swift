@@ -102,7 +102,11 @@ class ViewController: UIViewController {
             fatalError("No block for panning view!")
          }
          gestureBlock.imageView.center = CGPoint(x: gestureBlock.imageView.center.x + translation.x, y: gestureBlock.imageView.center.y + translation.y)
-         gestureBlock.positionChainImages()
+         if gestureBlock.isNestable {
+            gestureBlock.drawNestedBlock()
+         } else  {
+            gestureBlock.positionChainImages()
+         }
          gesture.setTranslation(CGPoint.zero, in: gesture.view)
          
          //Look for a block that could be connected to and produce a ghost image

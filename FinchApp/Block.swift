@@ -338,8 +338,8 @@ class Block: NSObject, KeyPadPopupDelegate {
       }
       nextBlock = b
       b.previousBlock = self
-      //b.resizeRepeatBlocks()
-      //positionChainImages()
+      b.resizeRepeatBlocks()
+      positionChainImages()
    }
    
    // Insert a block into this one (only for nesting blocks)
@@ -372,6 +372,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    }
    
    func drawNestedBlock() {
+      // Need to clean up what is happening here with origin!!
       
       var origin = CGPoint(x: 0, y: heightOfRectangle/6)
       
@@ -469,16 +470,16 @@ class Block: NSObject, KeyPadPopupDelegate {
    }
    
    //Look above for a repeat block that needs to be resized
-   //   func resizeRepeatBlocks() {
-   //      print("resize repeat blocks")
-   //      if let previousBlock = previousBlock {
-   //         if previousBlock.type == .additionLevel5 && previousBlock.blockChainToRepeat == self {
-   //            previousBlock.resizeFutureNestedBlocks()
-   //            previousBlock.positionChainImages()
-   //         }
-   //         previousBlock.resizeRepeatBlocks()
-   //      }
-   //   }
+      func resizeRepeatBlocks() {
+         print("resize repeat blocks")
+         if let previousBlock = previousBlock {
+//            if previousBlock.type == .additionLevel5 && previousBlock.blockChainToRepeat == self {
+//               previousBlock.resizeFutureNestedBlocks()
+//               previousBlock.positionChainImages()
+//            }
+            previousBlock.resizeRepeatBlocks()
+         }
+      }
    
    //   func resizeFutureNestedBlocks() {
    //      print("resize")
@@ -514,9 +515,9 @@ class Block: NSObject, KeyPadPopupDelegate {
    
    //Bring the image views to the front so that the last in the chain is on top
    func bringToFront() {
-      imageView.superview?.bringSubview(toFront: imageView)
-      blockChainToRepeat?.bringToFront()
-      nextBlock?.bringToFront()
+//      imageView.superview?.bringSubview(toFront: imageView)
+//      blockChainToRepeat?.bringToFront()
+//      nextBlock?.bringToFront()
    }
    
 }
