@@ -60,7 +60,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    var answer = UIButton()
    
    // Only for blocks that nest
-   var nestingOffsetX: CGFloat = 30
+   var nestingOffsetX: CGFloat = 10
    var parent: Block?
    var nestedChild1: Block?
    var nestedChild2: Block?
@@ -74,7 +74,9 @@ class Block: NSObject, KeyPadPopupDelegate {
       
       type = BlockType.getType(fromString: t)
       imageView = i
+      if type != .additionLevel5 {
       imageView.frame = CGRect(x: imageView.frame.origin.x,y: imageView.frame.origin.y, width: self.originalBlockWidth, height: self.blockHeight)
+      }
       originalWidth = i.frame.width
       currentWidth = i.frame.width
       
@@ -123,7 +125,7 @@ class Block: NSObject, KeyPadPopupDelegate {
          layoutBlock(buttonModified: firstNumber)
       case .additionLevel5:
          mathOperator = "+"
-         var origin = CGPoint(x: originalBlockWidth/4, y: heightOfRectangle/6)
+         var origin = CGPoint(x: nestingOffsetX, y: heightOfRectangle/6)
          firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(firstNumber)
          
@@ -134,6 +136,8 @@ class Block: NSObject, KeyPadPopupDelegate {
          origin.x += operatorLabel.frame.width
          secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(secondNumber)
+         
+         drawNestedBlock()
       default: ()
       }
       
@@ -317,7 +321,6 @@ class Block: NSObject, KeyPadPopupDelegate {
    }
    
    func drawNestedBlock() {
-      // Need to clean up what is happening here with origin!!
       
       var origin = CGPoint(x: 0, y: heightOfRectangle/6)
       
@@ -326,8 +329,7 @@ class Block: NSObject, KeyPadPopupDelegate {
          nestedChild1?.imageView.frame.origin.y = imageView.frame.origin.y
          nestedChild1?.drawNestedBlock()
          
-         origin = CGPoint(x: nestingOffsetX, y: heightOfRectangle/6)
-         origin.x += nestedChild1?.imageView.frame.width ?? 0
+         origin.x += nestingOffsetX + (nestedChild1?.imageView.frame.width ?? 0)
       } else {
          origin = firstNumber.frame.origin
          origin.x += firstNumber.frame.width
@@ -352,10 +354,8 @@ class Block: NSObject, KeyPadPopupDelegate {
       }
       
       // Resize the frame of the block itself
-      //if origin.x > originalWidth {
-         let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: imageView.frame.height)
-         imageView.frame = newFrame
-      //}
+      let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + nestingOffsetX, height: imageView.frame.height)
+      imageView.frame = newFrame
    }
    
    //attach block b to the end of this chain
@@ -392,7 +392,13 @@ class Block: NSObject, KeyPadPopupDelegate {
          } else {
             parent?.nestedChild2 = nil
          }
-         parent?.drawNestedBlock()
+         
+         // Now I want to redraw, but I want to call the drawing function only on the outermost block
+         var outermostBlock = parent
+         while let parentExists = outermostBlock?.parent {
+            outermostBlock = parentExists
+         }
+         outermostBlock?.drawNestedBlock()
          parent = nil
       } else {
          previousBlock?.nextBlock = nil

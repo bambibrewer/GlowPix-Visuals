@@ -163,14 +163,13 @@ class ViewController: UIViewController {
          
          var tempView = UIImageView()
          if id == "additionLevel5" {
-            tempView = UIImageView(image: UIImage(named: "testblock")?.resizableImage(withCapInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)))
+            tempView = UIImageView(image: UIImage(named: "glowpix-nestable-block-clear")?.resizableImage(withCapInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)))
          } else {
             tempView = UIImageView(image: UIImage(named: "glowpix-block-white")?.resizableImage(withCapInsets: UIEdgeInsets(top: 0, left: 50, bottom: 25, right: 10)))
          }
          
          tempView.center = gesture.location(in: self.view)
          self.view.addSubview(tempView)
-         print("stashing block")
          let tempBlock = Block(withTypeFromString: id, withView: tempView)
          
          tempBlocks[gesture.hash] = tempBlock
@@ -201,7 +200,6 @@ class ViewController: UIViewController {
          // otherwise add to workspace
          if menuView.frame.maxX < tempBlock.imageView.frame.origin.x {
             addBlockToWorkspace(tempBlock)
-            
             nestOrAttach(block: tempBlock)
          }
          
