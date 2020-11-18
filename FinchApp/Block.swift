@@ -285,33 +285,14 @@ class Block: NSObject, KeyPadPopupDelegate {
       return CGPoint(x: X, y: Y)
    }
    
-   func goToPosition(whenConnectingTo block: Block) {
-      let X = block.imageView.frame.origin.x
-      let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious
-      
-      self.imageView.frame.origin.x = X
-      self.imageView.center.y = Y
-   }
-   
-   
-   
-   func centerPosition(whenInsertingInto block: Block ) -> CGPoint {
-      let X = block.imageView.frame.origin.x + 34.0 + self.offsetToPrevious
-      let Y = block.imageView.center.y - block.offsetX + self.offsetX
-      
-      return CGPoint(x: X, y: Y)
-   }
    
    //Attach a block chain below this one
    func attachBlock (_ b: Block){
-      print("attach block")
-      
       if let nextBlock = nextBlock {
          b.attachToChain(nextBlock)
       }
       nextBlock = b
       b.previousBlock = self
-      b.resizeRepeatBlocks()
       positionChainImages()
    }
    
@@ -387,43 +368,35 @@ class Block: NSObject, KeyPadPopupDelegate {
       }
    }
    
-   func chainWidth() -> CGFloat {
-      return offsetToNext + offsetToPrevious + (nextBlock?.chainWidth() ?? 0.0)
+   func goToPosition(whenConnectingTo block: Block) {
+      let X = block.imageView.frame.origin.x
+      let Y = block.imageView.center.y + block.offsetToNext + self.offsetToPrevious
+      
+      self.imageView.frame.origin.x = X
+      self.imageView.center.y = Y
    }
    
-   //Put into position all of the images of a chain connecting to this one
+   // Position the vertical stack of blocks
    func positionChainImages(){
       if let nextBlock = nextBlock {
          nextBlock.goToPosition(whenConnectingTo: self)
          nextBlock.positionChainImages()
       }
-      if let repeater = blockChainToRepeat {
-         repeater.imageView.center = repeater.centerPosition(whenInsertingInto: self)
-         repeater.positionChainImages()
-      }
    }
    
-   //Look above for a repeat block that needs to be resized
-      func resizeRepeatBlocks() {
-         print("resize repeat blocks")
-         if let previousBlock = previousBlock {
-//            if previousBlock.type == .additionLevel5 && previousBlock.blockChainToRepeat == self {
-//               previousBlock.positionChainImages()
-//            }
-            previousBlock.resizeRepeatBlocks()
+   // Detach a block from the previous block in a vertical chain or from its parents, if it is nestable
+   func detachBlock(){
+      if isNestable {
+         if self == parent?.nestedChild1 {
+            parent?.nestedChild1 = nil
+         } else {
+            parent?.nestedChild2 = nil
          }
-      }
-
-   
-   func detachPreviousBlock(){
-      print("detach")
-      if previousBlock?.blockChainToRepeat == self {
-         previousBlock?.blockChainToRepeat = nil
-         previousBlock?.positionChainImages()
-      }else{
+         parent?.drawNestedBlock()
+         parent = nil
+      } else {
          previousBlock?.nextBlock = nil
       }
-      //previousBlock?.resizeRepeatBlocks()
       previousBlock = nil
    }
    

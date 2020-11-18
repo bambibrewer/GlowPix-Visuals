@@ -86,7 +86,7 @@ class ViewController: UIViewController {
       case .began:
          if let view = gesture.view as? UIImageView, let block = workspaceBlocks[view] {
             //if there is a block ahead of us on the chain, moving this block will change that
-            block.detachPreviousBlock()
+            block.detachBlock()
             block.bringToFront()
          }
          
@@ -263,14 +263,26 @@ class ViewController: UIViewController {
       deleteBlockChain(startingWith: firstBlock)
    }
    
+   // This function recursively deletes blocks
    func deleteBlockChain(startingWith block: Block?) {
       if let block = block {
+         // Delete the next blocks in the sequence
          deleteBlockChain(startingWith: block.nextBlock)
-         deleteBlockChain(startingWith: block.blockChainToRepeat)
+         
+         // Delete any children that exist
+         if let child1 = block.nestedChild1 {
+            deleteBlockChain(startingWith: child1)
+         }
+         if let child2 = block.nestedChild2 {
+            deleteBlockChain(startingWith: child2)
+         }
+         
+         // Delete this block
          deleteBlock(block)
       }
    }
    
+   // This function removes a single block
    func deleteBlock(_ block: Block){
       if block == startBlock { addStartBlock() } //if we delete the start block, add a new one
       block.imageView.removeFromSuperview()
