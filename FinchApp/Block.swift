@@ -60,6 +60,8 @@ class Block: NSObject, KeyPadPopupDelegate {
    var answer = UIButton()
    
    // Only for blocks that nest
+   var openParentheses = UILabel()
+   var closeParentheses = UILabel()
    var nestingOffsetX: CGFloat = 10
    var parent: Block?
    var nestedChild1: Block?
@@ -140,8 +142,6 @@ class Block: NSObject, KeyPadPopupDelegate {
          layoutNestedBlock()
       default: ()
       }
-      
-      
    }
    
    /* This is the function that is called when a user taps a number on the pop-up number pad. */
@@ -164,6 +164,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    /* This function configures a label in the block. Labels are used for math operators and = */
    func setupLabel(text: String, origin: CGPoint) -> UILabel {
       let label = UILabel(frame: CGRect(origin: origin, size: labelSize))
+      label.font = UIFont(name: label.font.fontName, size: 36)
       label.textColor = UIColor.black
       label.textAlignment = .center
       label.text = text
@@ -333,13 +334,19 @@ class Block: NSObject, KeyPadPopupDelegate {
       
       var origin = CGPoint(x: nestingOffsetX, y: heightOfRectangle/6)
       
+      // Add opening parentheses
+      openParentheses.removeFromSuperview()
+      openParentheses = setupLabel(text: "(", origin: origin)
+      imageView.addSubview(openParentheses)
+      origin.x += openParentheses.frame.width
+      
       // We don't want to remove a button if we are currently changing the number in it
       if (selectedButton != nil) && (firstNumber == selectedButton) {
          origin.x += firstNumber.frame.width
       } else {  // Otherwise we want to redraw
          firstNumber.removeFromSuperview()
          if nestedChild1 != nil {
-            nestedChild1?.imageView.frame.origin.x = imageView.frame.origin.x + nestingOffsetX
+            nestedChild1?.imageView.frame.origin.x = imageView.frame.origin.x + origin.x
             nestedChild1?.imageView.frame.origin.y = imageView.frame.origin.y
             nestedChild1?.layoutNestedBlock()
             
@@ -372,6 +379,12 @@ class Block: NSObject, KeyPadPopupDelegate {
             origin.x += secondNumber.frame.width
          }
       }
+      
+      // Add closing parentheses
+      closeParentheses.removeFromSuperview()
+      closeParentheses = setupLabel(text: ")", origin: origin)
+      imageView.addSubview(closeParentheses)
+      origin.x += closeParentheses.frame.width
       
       // Resize the frame of the block itself
       let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + nestingOffsetX, height: imageView.frame.height)
