@@ -40,8 +40,15 @@ class Block: NSObject, KeyPadPopupDelegate {
       return CGSize(width: labelWidth, height: heightOfButton)
    }
    
-   var offsetToNext: CGFloat //The distance along the y axis to place the next block.
-   var offsetToPrevious: CGFloat //The distance along the y axis to place the previous block
+   var offsetToNext: CGFloat { //The distance along the y axis to place the next block.
+      return 0.4*blockHeight
+   }
+   var offsetToPrevious: CGFloat {//The distance along the y axis to place the previous block
+      if type == .startBlock {
+         return 0
+      }
+      return 0.4*blockHeight
+   }
    
    var nextBlock: Block? //the block to be executed after this one
    var previousBlock: Block? //block before this one on chain
@@ -71,24 +78,13 @@ class Block: NSObject, KeyPadPopupDelegate {
       
       type = BlockType.getType(fromString: t)
       imageView = i
-      if type != .additionLevel5 {
-      imageView.frame = CGRect(x: imageView.frame.origin.x,y: imageView.frame.origin.y, width: self.originalBlockWidth, height: self.blockHeight)
-      }
       
       //Set the block's offsets so that other block link up properly
-      switch type {
-      case .startBlock:
-         offsetToNext = 0.4*blockHeight
-         offsetToPrevious = 0.0 //Should never be a previous block for the start block
-         isNestable = false
-      case .additionLevel5:
-         offsetToNext = 0.4*blockHeight
-         offsetToPrevious = 0.4*blockHeight
+      if (type == .additionLevel5) {
          isNestable = true
-      default:
-         offsetToNext = 0.4*blockHeight
-         offsetToPrevious = 0.4*blockHeight
+      } else {
          isNestable = false
+         imageView.frame = CGRect(x: imageView.frame.origin.x,y: imageView.frame.origin.y, width: self.originalBlockWidth, height: self.blockHeight)
       }
       
       super.init()
@@ -117,18 +113,6 @@ class Block: NSObject, KeyPadPopupDelegate {
          layoutBlock(buttonModified: firstNumber)
       case .additionLevel5:
          mathOperator = "+"
-         var origin = CGPoint(x: nestingOffsetX, y: heightOfRectangle/6)
-         firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
-         imageView.addSubview(firstNumber)
-         
-         origin.x += firstNumber.frame.width
-         operatorLabel = setupLabel(text: mathOperator, origin: origin)
-         imageView.addSubview(operatorLabel)
-         
-         origin.x += operatorLabel.frame.width
-         secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
-         imageView.addSubview(secondNumber)
-         
          layoutNestedBlock()
       default: ()
       }
