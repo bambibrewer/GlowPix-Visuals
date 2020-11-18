@@ -88,6 +88,9 @@ class ViewController: UIViewController {
             //if there is a block ahead of us on the chain, moving this block will change that
             block.detachBlock()
             block.bringToFront()
+            if block.isNestable {
+               block.layoutNestedBlocksOfTree(containing: block)
+            }
          }
          
       case .changed:

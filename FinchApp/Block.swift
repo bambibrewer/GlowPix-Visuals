@@ -320,8 +320,8 @@ class Block: NSObject, KeyPadPopupDelegate {
          if nestedChild1 != nil {
             nestedChild1?.imageView.frame.origin.x = imageView.frame.origin.x + origin.x
             nestedChild1?.imageView.frame.origin.y = imageView.frame.origin.y
+            nestedChild1?.bringToFront()
             nestedChild1?.layoutNestedBlock()
-            
             origin.x += nestedChild1?.imageView.frame.width ?? 0
          } else {
             firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
@@ -343,6 +343,7 @@ class Block: NSObject, KeyPadPopupDelegate {
             // When child 1 has moved, we need to adjust the position of child 2
             nestedChild2?.imageView.frame.origin.x = imageView.frame.origin.x + origin.x
             nestedChild2?.imageView.frame.origin.y = imageView.frame.origin.y
+            nestedChild2?.bringToFront()
             nestedChild2?.layoutNestedBlock()
             origin.x += nestedChild2?.imageView.frame.width ?? 0
          } else {
@@ -383,9 +384,20 @@ class Block: NSObject, KeyPadPopupDelegate {
    
    // Position the vertical stack of blocks
    func positionChainImages(){
-      if let nextBlock = nextBlock {
-         nextBlock.goToPosition(whenConnectingTo: self)
-         nextBlock.positionChainImages()
+      if !isNestable {        // This function shouldn't be called for a nestable block
+         if let nextBlock = nextBlock {
+            nextBlock.goToPosition(whenConnectingTo: self)
+            nextBlock.bringToFront()
+            nextBlock.positionChainImages()
+         }
+      }
+   }
+   
+   //Bring the image views to the front so that the last in the chain is on top
+   func bringToFront() {
+      imageView.superview?.bringSubview(toFront: imageView)
+      if !isNestable {
+         nextBlock?.bringToFront()
       }
    }
    
@@ -409,17 +421,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       previousBlock = nil
    }
    
-   //Bring the image views to the front so that the last in the chain is on top
-   func bringToFront() {
-//      imageView.superview?.bringSubview(toFront: imageView)
-//      nextBlock?.bringToFront()
-      if isNestable {
-         imageView.superview?.bringSubview(toFront: imageView)
-         layoutNestedBlocksOfTree(containing: self)
-      } else {
-         //nextBlock?.bringToFront()
-      }
-   }
+   
    
 }
 
@@ -433,9 +435,7 @@ enum BlockType {
    case additionLevel3
    case subtractionLevel3
    case doubleAdditionLevel3
-   
-   
-   
+ 
    static func getType(fromString string: String) -> BlockType{
       switch string {
       //Control (Level 3 only)
