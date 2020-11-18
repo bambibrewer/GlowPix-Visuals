@@ -40,10 +40,8 @@ class Block: NSObject, KeyPadPopupDelegate {
       return CGSize(width: labelWidth, height: heightOfButton)
    }
    
-   
    var offsetToNext: CGFloat //The distance along the y axis to place the next block.
    var offsetToPrevious: CGFloat //The distance along the y axis to place the previous block
-   let offsetX: CGFloat //The offset on the x axis for blocks that have a text field making them taller
    
    var nextBlock: Block? //the block to be executed after this one
    var previousBlock: Block? //block before this one on chain
@@ -66,10 +64,7 @@ class Block: NSObject, KeyPadPopupDelegate {
    var parent: Block?
    var nestedChild1: Block?
    var nestedChild2: Block?
-   var blockChainToRepeat: Block?
-   var currentWidth: CGFloat //for stretching
-   let originalWidth: CGFloat
-   
+
    var selectedButton: UIButton? = nil    // Button for which user is currently entering text
    
    init(withTypeFromString t: String, withView i: UIImageView) {
@@ -79,25 +74,20 @@ class Block: NSObject, KeyPadPopupDelegate {
       if type != .additionLevel5 {
       imageView.frame = CGRect(x: imageView.frame.origin.x,y: imageView.frame.origin.y, width: self.originalBlockWidth, height: self.blockHeight)
       }
-      originalWidth = i.frame.width
-      currentWidth = i.frame.width
       
       //Set the block's offsets so that other block link up properly
       switch type {
       case .startBlock:
          offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.0 //Should never be a previous block for the start block
-         offsetX = 0.0
          isNestable = false
       case .additionLevel5:
-         offsetToNext = 0.4*blockHeight//73.0
-         offsetToPrevious = 0.4*blockHeight//73.0
-         offsetX = 0.0//-2.0
+         offsetToNext = 0.4*blockHeight
+         offsetToPrevious = 0.4*blockHeight
          isNestable = true
       default:
          offsetToNext = 0.4*blockHeight
          offsetToPrevious = 0.4*blockHeight
-         offsetX = 0.0
          isNestable = false
       }
       
@@ -232,10 +222,8 @@ class Block: NSObject, KeyPadPopupDelegate {
       
       // No matther what block was selected, resize the frame of the block itself
       origin.x += answer.frame.width
-      if origin.x > originalWidth {
-         let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
-         imageView.frame = newFrame
-      }      
+      let newFrame = CGRect(x: imageView.frame.minX, y: imageView.frame.minY, width: origin.x + 10, height: blockHeight + 5)
+      imageView.frame = newFrame
    }
    
    /* This function removes any previous borders */
@@ -440,8 +428,13 @@ class Block: NSObject, KeyPadPopupDelegate {
    //Bring the image views to the front so that the last in the chain is on top
    func bringToFront() {
 //      imageView.superview?.bringSubview(toFront: imageView)
-//      blockChainToRepeat?.bringToFront()
 //      nextBlock?.bringToFront()
+      if isNestable {
+         imageView.superview?.bringSubview(toFront: imageView)
+         layoutNestedBlocksOfTree(containing: self)
+      } else {
+         //nextBlock?.bringToFront()
+      }
    }
    
 }
