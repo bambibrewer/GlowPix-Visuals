@@ -322,16 +322,18 @@ class Block: NSObject, KeyPadPopupDelegate {
    
    func drawNestedBlock() {
       
-      var origin = CGPoint(x: 0, y: heightOfRectangle/6)
+      var origin = CGPoint(x: nestingOffsetX, y: heightOfRectangle/6)
       
+      firstNumber.removeFromSuperview()
       if nestedChild1 != nil {
          nestedChild1?.imageView.frame.origin.x = imageView.frame.origin.x + nestingOffsetX
          nestedChild1?.imageView.frame.origin.y = imageView.frame.origin.y
          nestedChild1?.drawNestedBlock()
          
-         origin.x += nestingOffsetX + (nestedChild1?.imageView.frame.width ?? 0)
+         origin.x += nestedChild1?.imageView.frame.width ?? 0
       } else {
-         origin = firstNumber.frame.origin
+         firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
+         imageView.addSubview(firstNumber)
          origin.x += firstNumber.frame.width
       }
       
@@ -340,6 +342,7 @@ class Block: NSObject, KeyPadPopupDelegate {
       imageView.addSubview(operatorLabel)
       origin.x += operatorLabel.frame.width
       
+      secondNumber.removeFromSuperview()
       if nestedChild2 != nil {
          // When child 1 has moved, we need to adjust the position of child 2
          nestedChild2?.imageView.frame.origin.x = imageView.frame.origin.x + origin.x
@@ -347,7 +350,6 @@ class Block: NSObject, KeyPadPopupDelegate {
          nestedChild2?.drawNestedBlock()
          origin.x += nestedChild2?.imageView.frame.width ?? 0
       } else {
-         secondNumber.removeFromSuperview()
          secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(secondNumber)
          origin.x += secondNumber.frame.width
