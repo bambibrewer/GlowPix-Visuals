@@ -137,7 +137,7 @@ class Block: NSObject, KeyPadPopupDelegate {
          secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
          imageView.addSubview(secondNumber)
          
-         drawNestedBlock()
+         layoutNestedBlock()
       default: ()
       }
       
@@ -152,7 +152,11 @@ class Block: NSObject, KeyPadPopupDelegate {
             button.sizeToFit()
             addBorder(button: button)
             // If we changed the width of the button, we need to shift everything else to the right
-            layoutBlock(buttonModified: button)
+            if isNestable {
+               layoutNestedBlocksOfTree(containing: self)
+            } else {
+               layoutBlock(buttonModified: button)
+            }
          }
       }
    }
@@ -312,47 +316,61 @@ class Block: NSObject, KeyPadPopupDelegate {
          nestedChild2 = blockToInsert
       }
       
-      // Now I want to redraw, but I want to call the drawing function only on the outermost block
-      var outermostBlock = self
+      // Now I want to redraw all nested blocks in this tree
+      layoutNestedBlocksOfTree(containing: self)
+   }
+   
+   // This block finds the top of a nested tree containing a block and then lays our the entire tree
+   func layoutNestedBlocksOfTree(containing block: Block) {
+      var outermostBlock = block
       while let parentExists = outermostBlock.parent {
          outermostBlock = parentExists
       }
-      outermostBlock.drawNestedBlock()
+      outermostBlock.layoutNestedBlock()
    }
    
-   func drawNestedBlock() {
+   func layoutNestedBlock() {
       
       var origin = CGPoint(x: nestingOffsetX, y: heightOfRectangle/6)
       
-      firstNumber.removeFromSuperview()
-      if nestedChild1 != nil {
-         nestedChild1?.imageView.frame.origin.x = imageView.frame.origin.x + nestingOffsetX
-         nestedChild1?.imageView.frame.origin.y = imageView.frame.origin.y
-         nestedChild1?.drawNestedBlock()
-         
-         origin.x += nestedChild1?.imageView.frame.width ?? 0
-      } else {
-         firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
-         imageView.addSubview(firstNumber)
+      // We don't want to remove a button if we are currently changing the number in it
+      if (selectedButton != nil) && (firstNumber == selectedButton) {
          origin.x += firstNumber.frame.width
+      } else {  // Otherwise we want to redraw
+         firstNumber.removeFromSuperview()
+         if nestedChild1 != nil {
+            nestedChild1?.imageView.frame.origin.x = imageView.frame.origin.x + nestingOffsetX
+            nestedChild1?.imageView.frame.origin.y = imageView.frame.origin.y
+            nestedChild1?.layoutNestedBlock()
+            
+            origin.x += nestedChild1?.imageView.frame.width ?? 0
+         } else {
+            firstNumber = setupButton(text: firstNumber.title(for: .normal) ?? "", origin: origin)
+            imageView.addSubview(firstNumber)
+            origin.x += firstNumber.frame.width
+         }
       }
-      
       operatorLabel.removeFromSuperview()
       operatorLabel = setupLabel(text: mathOperator, origin: origin)
       imageView.addSubview(operatorLabel)
       origin.x += operatorLabel.frame.width
       
-      secondNumber.removeFromSuperview()
-      if nestedChild2 != nil {
-         // When child 1 has moved, we need to adjust the position of child 2
-         nestedChild2?.imageView.frame.origin.x = imageView.frame.origin.x + origin.x
-         nestedChild2?.imageView.frame.origin.y = imageView.frame.origin.y
-         nestedChild2?.drawNestedBlock()
-         origin.x += nestedChild2?.imageView.frame.width ?? 0
-      } else {
-         secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
-         imageView.addSubview(secondNumber)
+      // We don't want to remove a button if we are currently changing the number in it
+      if (selectedButton != nil) && (secondNumber == selectedButton) {
          origin.x += secondNumber.frame.width
+      } else {  // Otherwise we want to redraw
+         secondNumber.removeFromSuperview()
+         if nestedChild2 != nil {
+            // When child 1 has moved, we need to adjust the position of child 2
+            nestedChild2?.imageView.frame.origin.x = imageView.frame.origin.x + origin.x
+            nestedChild2?.imageView.frame.origin.y = imageView.frame.origin.y
+            nestedChild2?.layoutNestedBlock()
+            origin.x += nestedChild2?.imageView.frame.width ?? 0
+         } else {
+            secondNumber = setupButton(text: secondNumber.title(for: .normal) ?? "", origin: origin)
+            imageView.addSubview(secondNumber)
+            origin.x += secondNumber.frame.width
+         }
       }
       
       // Resize the frame of the block itself
@@ -395,12 +413,10 @@ class Block: NSObject, KeyPadPopupDelegate {
             parent?.nestedChild2 = nil
          }
          
-         // Now I want to redraw, but I want to call the drawing function only on the outermost block
-         var outermostBlock = parent
-         while let parentExists = outermostBlock?.parent {
-            outermostBlock = parentExists
+         // Redraw the parent tree
+         if let parentExists = parent {
+            layoutNestedBlocksOfTree(containing: parentExists)
          }
-         outermostBlock?.drawNestedBlock()
          parent = nil
       } else {
          previousBlock?.nextBlock = nil

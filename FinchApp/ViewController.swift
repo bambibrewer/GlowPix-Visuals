@@ -103,7 +103,7 @@ class ViewController: UIViewController {
          }
          gestureBlock.imageView.center = CGPoint(x: gestureBlock.imageView.center.x + translation.x, y: gestureBlock.imageView.center.y + translation.y)
          if gestureBlock.isNestable {
-            gestureBlock.drawNestedBlock()
+            gestureBlock.layoutNestedBlock()
          } else  {
             gestureBlock.positionChainImages()
          }
